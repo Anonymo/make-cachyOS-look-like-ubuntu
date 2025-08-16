@@ -103,13 +103,26 @@ fi
 REPO_DIR="$HOME/make-cachyOS-look-like-ubuntu"
 if [ -d "$REPO_DIR" ]; then
     message info "📂 Repository already exists, updating..."
-    cd "$REPO_DIR"
+    if ! cd "$REPO_DIR"; then
+        message error "Failed to enter repository directory: $REPO_DIR"
+        exit 1
+    fi
     git pull
 else
     message info "📥 Cloning repository..."
     cd "$HOME"
     git clone https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
-    cd "$REPO_DIR"
+    if ! cd "$REPO_DIR"; then
+        message error "Failed to enter cloned repository directory: $REPO_DIR"
+        exit 1
+    fi
+fi
+
+# Verify we're in the right directory
+if [ ! -f "make-cachyos-look-like-ubuntu.sh" ]; then
+    message error "Main script not found in $(pwd)"
+    message error "Expected to find: make-cachyos-look-like-ubuntu.sh"
+    exit 1
 fi
 
 # Make script executable
@@ -117,6 +130,7 @@ chmod +x make-cachyos-look-like-ubuntu.sh
 
 # Run the main script
 message info "🎨 Running Ubuntu transformation script..."
+message info "📍 Working directory: $(pwd)"
 ./make-cachyos-look-like-ubuntu.sh
 
 message info "🎉 Installation completed!"
