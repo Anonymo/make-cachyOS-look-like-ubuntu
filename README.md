@@ -2,7 +2,7 @@
 
 **Adapted for CachyOS from:** https://git.la10cy.net/DeltaLima/make-debian-look-like-ubuntu  
 **Original Author:** DeltaLima  
-**Adapted by:** raul
+**Adapted by:** Anonymo
 
 This script performs all necessary steps to make a CachyOS GNOME desktop look like an Ubuntu desktop.
 

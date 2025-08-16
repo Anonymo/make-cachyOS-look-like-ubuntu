@@ -4,7 +4,7 @@
 # Description: This script performs all necessary steps to make a CachyOS Gnome
 # desktop look like an Ubuntu desktop with Ubuntu themes and fonts.
 # Original Author: DeltaLima
-# Adapted for CachyOS by: raul
+# Adapted for CachyOS by: Anonymo
 # Date: 23.08.2025
 # Version: 1.1-cachyos
 # Usage: bash make-cachyos-look-like-ubuntu.sh
