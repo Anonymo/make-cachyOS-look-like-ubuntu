@@ -61,7 +61,7 @@ gnome-software networkmanager-openvpn
 dconf-editor thunderbird"
 
 # install gnome base (AUR packages)
-packages[2-desktop-gnome]="gnome-shell-extension-manager gnome-tweaks gnome-shell-extensions"
+packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions"
 
 # AUR packages to be installed separately
 aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme yaru-gnome-shell-theme"
@@ -101,7 +101,8 @@ function message() {
 
 error () 
 {
-  message error "ERROR!!"
+  message error "An error occurred! Check the output above for details."
+  message error "Script execution failed at line $BASH_LINENO"
   exit 1
 }
 
@@ -202,7 +203,10 @@ do
   
   # package installation #
   message "installing packages"
-  sudo pacman -S --needed --noconfirm ${packages[$category]} || error
+  if ! sudo pacman -S --needed --noconfirm ${packages[$category]}; then
+    message error "Failed to install packages: ${packages[$category]}"
+    error
+  fi
   
   # install AUR packages for specific categories
   if [ "$category" == "2-desktop-gnome" ] && [ -n "$aur_packages" ]
@@ -212,11 +216,17 @@ do
     if command -v yay &> /dev/null
     then
       message "using yay for AUR packages"
-      yay -S --needed --noconfirm $aur_packages || error
+      if ! yay -S --needed --noconfirm $aur_packages; then
+        message error "Failed to install AUR packages with yay: $aur_packages"
+        error
+      fi
     elif command -v paru &> /dev/null
     then
       message "using paru for AUR packages"
-      paru -S --needed --noconfirm $aur_packages || error
+      if ! paru -S --needed --noconfirm $aur_packages; then
+        message error "Failed to install AUR packages with paru: $aur_packages"
+        error
+      fi
     else
       message error "No AUR helper found. Please install yay or paru first to install AUR packages."
       error
@@ -232,7 +242,10 @@ do
       # Detect bootloader and configure accordingly
       if [ -f /etc/default/grub ] && command -v grub-mkconfig >/dev/null 2>&1; then
         message "Detected GRUB bootloader"
-        sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"/g' /etc/default/grub || error
+        if ! sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"/g' /etc/default/grub; then
+          message error "Failed to update GRUB configuration"
+          error
+        fi
         sudo grub-mkconfig -o /boot/grub/grub.cfg
       elif [ -d /boot/loader/entries ] && command -v bootctl >/dev/null 2>&1; then
         message "Detected systemd-boot bootloader"
