@@ -110,14 +110,14 @@ if [ "$use_original_backup" = true ]; then
     fi
     
     # Restore Super key behavior
-    if [ -f "$original_backup_dir/original-panel-main-menu.txt" ]; then
-        original_panel_menu=$(cat "$original_backup_dir/original-panel-main-menu.txt")
-        gsettings set org.gnome.desktop.wm.keybindings panel-main-menu "$original_panel_menu" 2>/dev/null || true
-    fi
-    
     if [ -f "$original_backup_dir/original-overlay-key.txt" ]; then
         original_overlay_key=$(cat "$original_backup_dir/original-overlay-key.txt")
         gsettings set org.gnome.mutter overlay-key "$original_overlay_key" 2>/dev/null || true
+    fi
+    
+    if [ -f "$original_backup_dir/original-toggle-application-view.txt" ]; then
+        original_toggle_app_view=$(cat "$original_backup_dir/original-toggle-application-view.txt")
+        gsettings set org.gnome.shell.keybindings toggle-application-view "$original_toggle_app_view" 2>/dev/null || true
     fi
     
     # Restore default applications
@@ -162,8 +162,8 @@ else
     gsettings reset org.gnome.shell disable-user-extensions
     
     # Reset Super key behavior
-    gsettings reset org.gnome.desktop.wm.keybindings panel-main-menu
     gsettings reset org.gnome.mutter overlay-key 2>/dev/null || true
+    gsettings reset org.gnome.shell.keybindings toggle-application-view 2>/dev/null || true
 fi
 
 # Disable extensions

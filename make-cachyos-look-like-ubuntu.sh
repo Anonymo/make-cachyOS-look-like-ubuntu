@@ -172,8 +172,8 @@ gsettings get org.gnome.desktop.interface icon-theme > "$backup_dir/original-ico
 gsettings get org.gnome.desktop.interface font-name > "$backup_dir/original-font-name.txt" 2>/dev/null || true
 gsettings get org.gnome.desktop.background picture-uri > "$backup_dir/original-background.txt" 2>/dev/null || true
 gsettings get org.gnome.desktop.background picture-uri-dark > "$backup_dir/original-background-dark.txt" 2>/dev/null || true
-gsettings get org.gnome.desktop.wm.keybindings panel-main-menu > "$backup_dir/original-panel-main-menu.txt" 2>/dev/null || true
 gsettings get org.gnome.mutter overlay-key > "$backup_dir/original-overlay-key.txt" 2>/dev/null || true
+gsettings get org.gnome.shell.keybindings toggle-application-view > "$backup_dir/original-toggle-application-view.txt" 2>/dev/null || true
 xdg-settings get default-web-browser > "$backup_dir/original-default-browser.txt" 2>/dev/null || echo "" > "$backup_dir/original-default-browser.txt"
 xdg-settings get default-url-scheme-handler mailto > "$backup_dir/original-default-email.txt" 2>/dev/null || echo "" > "$backup_dir/original-default-email.txt"
 
@@ -394,13 +394,13 @@ do
       # set accent color to orange
       gsettings set org.gnome.desktop.interface accent-color 'orange'
 
-      # configure Super key to open app menu (Ubuntu-like behavior)
+      # configure Super key to open applications menu (Ubuntu-like behavior)
       message "configure Super key to open applications menu"
-      # Note: In modern GNOME, Super key behavior might require extensions or manual configuration
-      # For now, we'll configure what we can and inform the user
-      message warn "Super key configuration: Modern GNOME may require manual setup"
-      message "To manually configure: Go to Settings > Keyboard > View and Customize Shortcuts > System"
-      message "Look for 'Show the activities overview' and change it to show applications instead"
+      # Disable the default overlay (activities overview) behavior
+      gsettings set org.gnome.mutter overlay-key '' 2>/dev/null || message warn "Could not disable overlay-key"
+      # Set Super key to toggle application view instead
+      gsettings set org.gnome.shell.keybindings toggle-application-view "['Super_L']" 2>/dev/null || message warn "Could not set toggle-application-view keybinding"
+      message "Super key configured to open applications menu like Ubuntu"
 
       # gtk-3.0 and gtk-4.0 settings
       message "setting gtk-3.0 and gtk-4.0 default to dark"
