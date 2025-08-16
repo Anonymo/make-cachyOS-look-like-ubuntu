@@ -43,14 +43,26 @@ if [ "$(whoami)" == "root" ]; then
     exit 1
 fi
 
-# Check if user is in sudo group
-if ! groups | grep sudo > /dev/null; then
-    message error "Your user $USER is not in the 'sudo' group."
-    message error "Add your user to the group with:"
-    message error " ${YELLOW}su -c \"/usr/sbin/usermod -aG sudo ${USER}\"${ENDCOLOR}"
-    message error "Then reboot and run this script again."
+# Get current user
+CURRENT_USER=$(whoami)
+USER_GROUPS=$(groups)
+
+# Check if user is in sudo or wheel group (CachyOS uses wheel)
+if ! echo "$USER_GROUPS" | grep -E "(sudo|wheel)" > /dev/null; then
+    message error "Your user '$CURRENT_USER' is not in the 'sudo' or 'wheel' group."
+    message error "CachyOS typically uses the 'wheel' group for sudo access."
+    message error "Add your user to the wheel group with:"
+    message error " ${YELLOW}su -c \"usermod -aG wheel ${CURRENT_USER}\"${ENDCOLOR}"
+    message error "Then logout/login or reboot and run this script again."
     exit 1
 fi
+
+# Verify sudo access works
+if ! sudo -n true 2>/dev/null; then
+    message info "Sudo password may be required for installation"
+fi
+
+message info "✅ User '$CURRENT_USER' is in the $(echo "$USER_GROUPS" | grep -oE "(sudo|wheel)" | head -1) group"
 
 # Install git if not present
 if ! command -v git &> /dev/null; then
