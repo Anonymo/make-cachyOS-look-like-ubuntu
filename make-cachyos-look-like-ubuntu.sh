@@ -102,8 +102,8 @@ error ()
 confirm_continue()
 {
   message warn "Type '${GREEN}y${ENDCOLOR}' or '${GREEN}yes${ENDCOLOR}' and hit [ENTER] to continue"
-  read -p "[y/N?] " continue
-  if [ "${continue,,}" != "y" ] && [ "${continue,,}" != "yes" ]
+  read -p "[y/N?] " user_confirmation
+  if [ "${user_confirmation,,}" != "y" ] && [ "${user_confirmation,,}" != "yes" ]
   then
     message error "Installation aborted by user."
     exit 1
