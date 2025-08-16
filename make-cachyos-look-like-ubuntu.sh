@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set -e
+
+trap 'echo "ERROR: An error occurred on line $LINENO. The script will now exit." >&2' ERR
+
+
 # Title: make-cachyos-look-like-ubuntu.sh
 # Description: This script performs all necessary steps to make a CachyOS Gnome
 # desktop look like an Ubuntu desktop with Ubuntu themes and fonts.
@@ -100,7 +105,7 @@ confirm_continue()
   read -p "[y/N?] " continue
   if [ "${continue,,}" != "y" ] && [ "${continue,,}" != "yes" ]
   then
-    message error "Installation aborted."
+    message error "Installation aborted by user."
     exit 1
   fi
 }
