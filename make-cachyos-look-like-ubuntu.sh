@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# Title: make-debian-look-like-ubuntu.sh
-# Description: This script performs all necessary steps to make a Debian Gnome
+# Title: make-cachyos-look-like-ubuntu.sh
+# Description: This script performs all necessary steps to make a CachyOS Gnome
 # desktop look like an Ubuntu desktop. Also it installs flatpak with 
-# flathub.org repository enabled and Firefox from there.
-# Author: DeltaLima
+# flathub.org repository enabled.
+# Original Author: DeltaLima
+# Adapted for CachyOS by: raul
 # Date: 23.08.2025
-# Version: 1.1
-# Usage: bash make-debian-look-like-ubuntu.sh
+# Version: 1.1-cachyos
+# Usage: bash make-cachyos-look-like-ubuntu.sh
+# 
+# Based on: https://github.com/Anonymo/make-cachyOS-look-like-ubuntu
 # 
 # Copyright 2023 DeltaLima (Marcus Hanisch)
 # 
@@ -39,21 +42,19 @@ declare -A packages
 # the first three array entries are numbered because they have to be ordered
 
 # install base desktop stuff
-packages[0-base]="plymouth ecryptfs-utils curl wget python-is-python3 binutils" 
+packages[0-base]="plymouth ecryptfs-utils curl wget python binutils" 
 
 # install desktop base
-packages[1-desktop-base]="ttf-mscorefonts-installer fonts-ubuntu fonts-ubuntu-console fonts-liberation2
-fonts-noto-core fonts-noto-color-emoji fonts-dejavu fonts-hack
-flatpak flatpak-xdg-utils gnome-software-plugin-flatpak network-manager-openvpn-gnome
+packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
+noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
+flatpak gnome-software networkmanager-openvpn
 dconf-editor thunderbird"
 
-# install gnome base
-packages[2-desktop-gnome]="gnome-shell-extension-manager gnome-tweaks gnome-shell-extensions 
-gnome-shell-extension-desktop-icons-ng gnome-shell-extension-dashtodock
-gnome-shell-extension-appindicator gnome-shell-extension-system-monitor 
-yaru-theme-gnome-shell yaru-theme-gtk yaru-theme-icon yaru-theme-sound
-yaru-theme-unity
-gnome-package-updater gnome-packagekit"
+# install gnome base (AUR packages)
+packages[2-desktop-gnome]="gnome-shell-extension-manager gnome-tweaks gnome-shell-extensions"
+
+# AUR packages to be installed separately
+aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme yaru-gnome-shell-theme"
 
 # if you want to add for automation purposes your own packages, just add another array field, like
 #packages[4-my-packages]="shutter solaar steam-installer chromium dosbox gimp vlc audacity keepassxc audacious nextcloud-desktop"
@@ -121,9 +122,9 @@ fi
 
 # sort the category list, some of them have to be in order
 package_categories="$(echo $package_categories | xargs -n1 | sort | xargs)"
-message "Welcome to ${GREEN}make-debian-look-like-ubuntu${ENDCOLOR}!"
+message "Welcome to ${GREEN}make-cachyos-look-like-ubuntu${ENDCOLOR}!"
 message ""
-message "This script makes a fresh Debian-Gnome installation to look like"
+message "This script makes a fresh CachyOS-Gnome installation to look like"
 message "an Ubuntu Gnome installation. Settings are applied for the user"
 message "running this script (${YELLOW}${USER}${ENDCOLOR})".
 message ""
@@ -151,28 +152,17 @@ then
   message error "after that, you need to reboot."
   error
 fi
-message "check sources.list"
-if ! ( ( grep "contrib" /etc/apt/sources.list > /dev/null ) && ( grep -E " non-free( |$)" /etc/apt/sources.list > /dev/null ) )
+message "check pacman configuration"
+# Ensure multilib repository is enabled for some packages
+if ! grep -q "^\[multilib\]" /etc/pacman.conf
 then
-  message warn "I need 'contrib' and 'non-free' in sources.ist, I will deploy my own"
+  message warn "Enabling multilib repository for additional packages"
   confirm_continue
-  message "backup old sources.list to /etc/apt/sources.list.bak"
-  sudo cp /etc/apt/sources.list /etc/apt/sources.list.$(date "+%s")bak
-  cat << EOF | sudo tee /etc/apt/sources.list
-deb http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
-
-deb http://security.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
-deb-src http://security.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
-
-# trixie-updates, to get updates before a point release is made;
-# see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
-deb http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
-EOF
-
-  message "apt update"
-  sudo apt update
+  message "backup pacman.conf"
+  sudo cp /etc/pacman.conf /etc/pacman.conf.$(date "+%s")bak
+  sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
+  message "pacman -Sy"
+  sudo pacman -Sy
 fi
 
 
@@ -187,14 +177,32 @@ do
   # pre installation steps for categories
   case $category in
     nice)
-      sudo dpkg --add-architecture i386 || error
-      sudo apt update || error
+      # No equivalent needed for CachyOS/pacman
       ;;
   esac
   
   # package installation #
   message "installing packages"
-  sudo apt install -y ${packages[$category]} || error
+  sudo pacman -S --needed --noconfirm ${packages[$category]} || error
+  
+  # install AUR packages for specific categories
+  if [ "$category" == "2-desktop-gnome" ] && [ -n "$aur_packages" ]
+  then
+    message "installing AUR packages"
+    # Check for available AUR helper
+    if command -v yay &> /dev/null
+    then
+      message "using yay for AUR packages"
+      yay -S --needed --noconfirm $aur_packages || error
+    elif command -v paru &> /dev/null
+    then
+      message "using paru for AUR packages"
+      paru -S --needed --noconfirm $aur_packages || error
+    else
+      message error "No AUR helper found. Please install yay or paru first to install AUR packages."
+      error
+    fi
+  fi
   
   message "running post-tasks"
   # post installation steps for categories
@@ -202,32 +210,12 @@ do
     0-base)
       message "sed default grub option"
       sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"/g' /etc/default/grub || error
-      sudo update-grub
+      sudo grub-mkconfig -o /boot/grub/grub.cfg
       ;;
 
     1-desktop-base)
       message "add flathub.org flatpak repository"
       sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || error
-      
-      # here was also com.github.GradienceTeam.Gradience included installed, but not needed
-      # anymore - i found the relevant ~/.config/gtk-{3,4}.0/gtk.css file ;) 
-      message "install firefox flatpak"
-      sudo flatpak install org.mozilla.firefox || error
-      message "set firefox flatpak to default"
-      xdg-settings set default-web-browser org.mozilla.firefox.desktop 
-      
-      message "apply font fix for firefox flatpak"
-      mkdir -p $HOME/.var/app/org.mozilla.firefox/config/fontconfig/
-      cat << EOF > $HOME/.var/app/org.mozilla.firefox/config/fontconfig/fonts.conf
-<?xml version='1.0'?>
-<!DOCTYPE fontconfig SYSTEM 'fonts.dtd'>
-<fontconfig>
-    <!-- Disable bitmap fonts. -->
-    <selectfont><rejectfont><pattern>
-        <patelt name="scalable"><bool>false</bool></patelt>
-    </pattern></rejectfont></selectfont>
-</fontconfig>
-EOF
       
       # fix big cursor issue in qt apps
       message "Set XCURSOR_SIZE=24 in /etc/environment to fix Big cursor bug in QT"
@@ -307,10 +295,9 @@ EOF
 @define-color accent_fg_color #ffffff;
 EOF
 
-      # replace firefox-esr with flatpak in dock
-      message "replace firefox-esr with flatpak in dock"
-      gsettings get org.gnome.shell favorite-apps | grep "org.mozilla.firefox.desktop" > /dev/null ||
-      gsettings set org.gnome.shell favorite-apps "$(gsettings get  org.gnome.shell favorite-apps  | sed 's/firefox-esr\.desktop/org\.mozilla\.firefox\.desktop/')"
+      # remove firefox-esr from dock (using system firefox instead)
+      message "remove firefox-esr from dock"
+      gsettings set org.gnome.shell favorite-apps "$(gsettings get  org.gnome.shell favorite-apps  | sed 's/firefox-esr\.desktop, //g' | sed 's/, firefox-esr\.desktop//g' | sed 's/firefox-esr\.desktop//g')"
 
       # replace evolution with thunderbird in dock
       message "replace evolution with thunderbird in dock"
