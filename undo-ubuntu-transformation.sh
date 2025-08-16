@@ -109,6 +109,17 @@ if [ "$use_original_backup" = true ]; then
         gsettings set org.gnome.shell favorite-apps "$original_favorites" 2>/dev/null || true
     fi
     
+    # Restore Super key behavior
+    if [ -f "$original_backup_dir/original-panel-main-menu.txt" ]; then
+        original_panel_menu=$(cat "$original_backup_dir/original-panel-main-menu.txt")
+        gsettings set org.gnome.desktop.wm.keybindings panel-main-menu "$original_panel_menu" 2>/dev/null || true
+    fi
+    
+    if [ -f "$original_backup_dir/original-overlay-key.txt" ]; then
+        original_overlay_key=$(cat "$original_backup_dir/original-overlay-key.txt")
+        gsettings set org.gnome.mutter overlay-key "$original_overlay_key" 2>/dev/null || true
+    fi
+    
 else
     message "🔧 Resetting GNOME settings to defaults (no original backup found)..."
 
@@ -134,6 +145,10 @@ else
     # Reset shell settings
     gsettings reset org.gnome.shell favorite-apps
     gsettings reset org.gnome.shell disable-user-extensions
+    
+    # Reset Super key behavior
+    gsettings reset org.gnome.desktop.wm.keybindings panel-main-menu
+    gsettings reset org.gnome.mutter overlay-key 2>/dev/null || true
 fi
 
 # Disable extensions

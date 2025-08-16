@@ -172,6 +172,8 @@ gsettings get org.gnome.desktop.interface icon-theme > "$backup_dir/original-ico
 gsettings get org.gnome.desktop.interface font-name > "$backup_dir/original-font-name.txt" 2>/dev/null || true
 gsettings get org.gnome.desktop.background picture-uri > "$backup_dir/original-background.txt" 2>/dev/null || true
 gsettings get org.gnome.desktop.background picture-uri-dark > "$backup_dir/original-background-dark.txt" 2>/dev/null || true
+gsettings get org.gnome.desktop.wm.keybindings panel-main-menu > "$backup_dir/original-panel-main-menu.txt" 2>/dev/null || true
+gsettings get org.gnome.mutter overlay-key > "$backup_dir/original-overlay-key.txt" 2>/dev/null || true
 
 # Backup GRUB settings if exists
 if [ -f /etc/default/grub ]; then
@@ -366,6 +368,13 @@ do
 
       # set accent color to orange
       gsettings set org.gnome.desktop.interface accent-color 'orange'
+
+      # configure Super key to open app menu instead of activities overview
+      message "configure Super key to open applications menu"
+      # Set Super key to open main menu like Ubuntu
+      gsettings set org.gnome.desktop.wm.keybindings panel-main-menu "['<Super>']"
+      # Optionally disable the default overview behavior (if the setting exists)
+      gsettings set org.gnome.mutter overlay-key '' 2>/dev/null || message warn "Could not disable overlay-key (may not be available)"
 
       # gtk-3.0 and gtk-4.0 settings
       message "setting gtk-3.0 and gtk-4.0 default to dark"
