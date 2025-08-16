@@ -132,7 +132,7 @@ message "This script makes a fresh CachyOS-Gnome installation to look like"
 message "an Ubuntu Gnome installation. Settings are applied for the user"
 message "running this script (${YELLOW}${USER}${ENDCOLOR})".
 message ""
-message "Your user has to be in the 'sudo' group."
+message "Your user has to be in the 'sudo' or 'wheel' group."
 message "If not, the script will guide you."
 message ""
 message "The process is divided into following steps:"
@@ -148,14 +148,21 @@ confirm_continue
 
 message "Continue with installation..."
 
-if ! groups | grep sudo > /dev/null
-then
-  message error "Your user $USER is not in group 'sudo'."
-  message error "Add your user to the group with:"
-  message error " ${YELLOW}su -c \"/usr/sbin/usermod -aG sudo ${USER}\"${ENDCOLOR}"
-  message error "after that, you need to reboot."
+# Get current user and groups
+CURRENT_USER=$(whoami)
+USER_GROUPS=$(groups)
+
+# Check if user is in sudo or wheel group (CachyOS uses wheel)
+if ! echo "$USER_GROUPS" | grep -E "(sudo|wheel)" > /dev/null; then
+  message error "Your user '$CURRENT_USER' is not in the 'sudo' or 'wheel' group."
+  message error "CachyOS typically uses the 'wheel' group for sudo access."
+  message error "Add your user to the wheel group with:"
+  message error " ${YELLOW}su -c \"usermod -aG wheel ${CURRENT_USER}\"${ENDCOLOR}"
+  message error "Then logout/login or reboot and run this script again."
   error
 fi
+
+message "✅ User '$CURRENT_USER' is in the $(echo "$USER_GROUPS" | grep -oE "(sudo|wheel)" | head -1) group"
 message "check pacman configuration"
 # Ensure multilib repository is enabled for some packages
 if ! grep -q "^\[multilib\]" /etc/pacman.conf
