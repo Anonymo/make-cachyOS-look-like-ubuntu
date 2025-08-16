@@ -61,7 +61,7 @@ gnome-software networkmanager-openvpn
 dconf-editor thunderbird"
 
 # install gnome base (AUR packages)
-packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator"
+packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator gnome-shell-extension-desktop-icons-ng"
 
 # AUR packages to be installed separately
 aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme yaru-gnome-shell-theme gnome-shell-extension-dash-to-dock"
@@ -290,6 +290,7 @@ do
       message warn "Could not enable dash-to-dock extension"
       
       gnome-extensions enable ding@rastersoft.com 2>/dev/null || \
+      gnome-extensions enable desktop-icons-ng@rastersoft.com 2>/dev/null || \
       message warn "Could not enable desktop-icons extension"
       
       message "apply settings for dash-to-dock"
