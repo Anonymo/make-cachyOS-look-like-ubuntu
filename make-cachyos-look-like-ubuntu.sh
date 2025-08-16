@@ -58,7 +58,7 @@ packages[0-base]="plymouth ecryptfs-utils curl wget python binutils"
 packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
 noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
 gnome-software networkmanager-openvpn
-dconf-editor thunderbird firefox"
+dconf-editor thunderbird firefox-pure"
 
 # install gnome base (AUR packages)
 packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator gnome-shell-extension-desktop-icons-ng"
@@ -174,6 +174,8 @@ gsettings get org.gnome.desktop.background picture-uri > "$backup_dir/original-b
 gsettings get org.gnome.desktop.background picture-uri-dark > "$backup_dir/original-background-dark.txt" 2>/dev/null || true
 gsettings get org.gnome.desktop.wm.keybindings panel-main-menu > "$backup_dir/original-panel-main-menu.txt" 2>/dev/null || true
 gsettings get org.gnome.mutter overlay-key > "$backup_dir/original-overlay-key.txt" 2>/dev/null || true
+xdg-settings get default-web-browser > "$backup_dir/original-default-browser.txt" 2>/dev/null || echo "" > "$backup_dir/original-default-browser.txt"
+xdg-settings get default-url-scheme-handler mailto > "$backup_dir/original-default-email.txt" 2>/dev/null || echo "" > "$backup_dir/original-default-email.txt"
 
 # Backup GRUB settings if exists
 if [ -f /etc/default/grub ]; then
@@ -229,6 +231,11 @@ do
   message "running pre-tasks"
   # pre installation steps for categories
   case $category in
+    1-desktop-base)
+      # Remove unwanted browsers before installing firefox-pure
+      message "removing unwanted browsers"
+      sudo pacman -Rns --noconfirm firefox epiphany 2>/dev/null || message warn "Some browsers were not installed or could not be removed"
+      ;;
     nice)
       # No equivalent needed for CachyOS/pacman
       ;;
@@ -302,6 +309,24 @@ do
       # fix big cursor issue in qt apps
       message "Set XCURSOR_SIZE=24 in /etc/environment to fix Big cursor bug in QT"
       grep "XCURSOR_SIZE" /etc/environment || echo "XCURSOR_SIZE=24" | sudo tee -a /etc/environment > /dev/null
+      
+      # Set default applications
+      message "configuring default applications"
+      
+      # Set firefox-pure as default browser
+      message "setting firefox-pure as default web browser"
+      xdg-settings set default-web-browser firefox-pure.desktop 2>/dev/null || message warn "Could not set firefox-pure as default browser"
+      
+      # Handle email client defaults
+      current_email=$(xdg-settings get default-url-scheme-handler mailto 2>/dev/null || echo "")
+      message "checking current default email client: $current_email"
+      
+      if [[ "$current_email" == "org.gnome.Evolution.desktop" ]]; then
+        message "Evolution is default email client - keeping it unchanged"
+      else
+        message "setting Thunderbird as default email client"
+        xdg-settings set default-url-scheme-handler mailto thunderbird.desktop 2>/dev/null || message warn "Could not set Thunderbird as default email client"
+      fi
       ;;
 
     2-desktop-gnome)
@@ -392,17 +417,19 @@ EOF
 @define-color accent_fg_color #ffffff;
 EOF
 
-      # add Firefox to dock if not already present
-      message "configure Firefox in dock"
+      # add Firefox-pure to dock if not already present
+      message "configure Firefox-pure in dock"
       current_apps=$(gsettings get org.gnome.shell favorite-apps)
-      # Add firefox if not already present
-      if ! echo "$current_apps" | grep -q "firefox\.desktop"; then
-        message "adding Firefox to dock"
-        # Add firefox at the end of the list
-        current_apps=$(echo "$current_apps" | sed "s/\]/, 'firefox.desktop']/")
+      # Remove regular firefox if present and add firefox-pure
+      current_apps=$(echo "$current_apps" | sed 's/firefox\.desktop, //g' | sed 's/, firefox\.desktop//g' | sed 's/firefox\.desktop//g')
+      # Add firefox-pure if not already present
+      if ! echo "$current_apps" | grep -q "firefox-pure\.desktop"; then
+        message "adding Firefox-pure to dock"
+        # Add firefox-pure at the end of the list
+        current_apps=$(echo "$current_apps" | sed "s/\]/, 'firefox-pure.desktop']/")
         gsettings set org.gnome.shell favorite-apps "$current_apps"
       else
-        message "Firefox already in dock"
+        message "Firefox-pure already in dock"
       fi
 
       # configure email client in dock

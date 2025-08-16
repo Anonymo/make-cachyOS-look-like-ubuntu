@@ -120,6 +120,21 @@ if [ "$use_original_backup" = true ]; then
         gsettings set org.gnome.mutter overlay-key "$original_overlay_key" 2>/dev/null || true
     fi
     
+    # Restore default applications
+    if [ -f "$original_backup_dir/original-default-browser.txt" ]; then
+        original_browser=$(cat "$original_backup_dir/original-default-browser.txt")
+        if [ -n "$original_browser" ]; then
+            xdg-settings set default-web-browser "$original_browser" 2>/dev/null || true
+        fi
+    fi
+    
+    if [ -f "$original_backup_dir/original-default-email.txt" ]; then
+        original_email=$(cat "$original_backup_dir/original-default-email.txt")
+        if [ -n "$original_email" ]; then
+            xdg-settings set default-url-scheme-handler mailto "$original_email" 2>/dev/null || true
+        fi
+    fi
+    
 else
     message "🔧 Resetting GNOME settings to defaults (no original backup found)..."
 
