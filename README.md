@@ -58,6 +58,7 @@ When the script runs the first time, it is normal that the terminal font looks d
 - GNOME Software (package manager GUI)
 - NetworkManager OpenVPN support
 - Thunderbird email client
+- rofi-wayland (menu system for HUD functionality)
 
 ### AUR Packages
 - `ttf-ms-fonts` - Microsoft core fonts
@@ -66,6 +67,8 @@ When the script runs the first time, it is normal that the terminal font looks d
 - `yaru-sound-theme` - Ubuntu's Yaru sound theme
 - `yaru-gnome-shell-theme` - Ubuntu's Yaru GNOME Shell theme
 - `gnome-shell-extension-dash-to-dock` - Dash to Dock extension
+- `gnome-hud` - Unity-like HUD menu for quick application menu access
+- `appmenu-gtk-module-git` - Global menu support for GTK applications
 
 ### GNOME Extensions
 
@@ -127,5 +130,16 @@ The undo script will:
 - ⚠️ Optionally remove Ubuntu packages
 
 **Note:** Some changes may require manual cleanup via Extension Manager.
+
+## Unity-like Features
+
+The script now includes **gnome-hud**, which brings back Unity's signature HUD (Heads-Up Display) functionality:
+
+- **Quick Menu Access**: Press `Ctrl + Alt + Space` to open the HUD
+- **Search Application Menus**: Type to quickly find any menu item in the current application
+- **Keyboard-Driven Navigation**: Access any application function without clicking through menus
+- **Authentic Ubuntu Experience**: Restores one of Unity's most beloved features
+
+This makes the desktop feel even more like classic Ubuntu with Unity!
 
 ![Ubuntuish CachyOS GNOME Desktop](screenshot/screenshot1.png "Ubuntuish CachyOS GNOME Desktop")

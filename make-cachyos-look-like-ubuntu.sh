@@ -58,13 +58,13 @@ packages[0-base]="plymouth ecryptfs-utils curl wget python binutils"
 packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
 noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
 gnome-software networkmanager-openvpn
-dconf-editor thunderbird firefox-pure gnome-terminal"
+dconf-editor thunderbird firefox-pure gnome-terminal rofi-wayland"
 
 # install gnome base (AUR packages)
 packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator gnome-shell-extension-desktop-icons-ng"
 
 # AUR packages to be installed separately
-aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme yaru-gnome-shell-theme gnome-shell-extension-dash-to-dock"
+aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme yaru-gnome-shell-theme gnome-shell-extension-dash-to-dock gnome-hud appmenu-gtk-module-git"
 
 # if you want to add for automation purposes your own packages, just add another array field, like
 #packages[4-my-packages]="shutter solaar steam-installer chromium dosbox gimp vlc audacity keepassxc audacious nextcloud-desktop"
