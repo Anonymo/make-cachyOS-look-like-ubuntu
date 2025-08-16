@@ -24,7 +24,15 @@ This script performs all necessary steps to make a CachyOS GNOME desktop look li
 
 ## Installation
 
-### Step 1: Install required tools
+### Quick One-Command Installation (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Anonymo/make-cachyOS-look-like-ubuntu/main/install.sh | bash
+```
+
+### Manual Installation (Step-by-Step)
+
+#### Step 1: Install required tools
 ```bash
 # Install git if not already installed
 sudo pacman -S git
@@ -37,13 +45,13 @@ makepkg -si
 cd ..
 ```
 
-### Step 2: Clone this repository
+#### Step 2: Clone this repository
 ```bash
 git clone https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
 cd make-cachyOS-look-like-ubuntu
 ```
 
-### Step 3: Run the script
+#### Step 3: Run the script
 ```bash
 bash make-cachyos-look-like-ubuntu.sh
 ```
