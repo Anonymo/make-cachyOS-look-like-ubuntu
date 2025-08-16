@@ -219,9 +219,29 @@ do
   # post installation steps for categories
   case $category in
     0-base)
-      message "sed default grub option"
-      sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"/g' /etc/default/grub || error
-      sudo grub-mkconfig -o /boot/grub/grub.cfg
+      message "Configuring bootloader for quiet splash..."
+      
+      # Detect bootloader and configure accordingly
+      if [ -f /etc/default/grub ] && command -v grub-mkconfig >/dev/null 2>&1; then
+        message "Detected GRUB bootloader"
+        sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"/g' /etc/default/grub || error
+        sudo grub-mkconfig -o /boot/grub/grub.cfg
+      elif [ -d /boot/loader/entries ] && command -v bootctl >/dev/null 2>&1; then
+        message "Detected systemd-boot bootloader"
+        message "Note: systemd-boot entries may need manual editing for quiet splash"
+        message "Edit files in /boot/loader/entries/ and add 'quiet splash' to options line"
+      elif [ -f /boot/refind_linux.conf ] || [ -d /boot/EFI/refind ]; then
+        message "Detected rEFInd bootloader"
+        message "Note: rEFInd configuration may need manual editing for quiet splash"
+        message "Edit /boot/refind_linux.conf or entries in /boot/EFI/refind/"
+      elif [ -f /boot/limine.cfg ] || [ -d /boot/EFI/BOOT ] && grep -q "limine" /boot/EFI/BOOT/* 2>/dev/null; then
+        message "Detected Limine bootloader"
+        message "Note: Limine configuration may need manual editing for quiet splash"
+        message "Edit /boot/limine.cfg and add 'quiet splash' to KERNEL_CMDLINE"
+      else
+        message warn "Could not detect bootloader type"
+        message warn "You may need to manually add 'quiet splash' to your bootloader configuration"
+      fi
       ;;
 
     1-desktop-base)
