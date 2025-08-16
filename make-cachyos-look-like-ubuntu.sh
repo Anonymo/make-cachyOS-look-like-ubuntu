@@ -61,7 +61,7 @@ gnome-software networkmanager-openvpn
 dconf-editor thunderbird"
 
 # install gnome base (AUR packages)
-packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions"
+packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator"
 
 # AUR packages to be installed separately
 aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme yaru-gnome-shell-theme"
@@ -277,13 +277,20 @@ do
       gsettings set org.gnome.shell disable-user-extensions false
       
       message "enable gnome shell extensions"
-      gnome-extensions enable ubuntu-appindicators@ubuntu.com
+      # AppIndicator extension (try both possible IDs)
+      gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com 2>/dev/null || \
+      gnome-extensions enable ubuntu-appindicators@ubuntu.com 2>/dev/null || \
+      message warn "Could not enable AppIndicator extension - may need to be enabled manually"
       
-      # panel-osd does no longer exist in debian 13
-      #gnome-extensions enable panel-osd@berend.de.schouwer.gmail.com
-      gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com
-      gnome-extensions enable dash-to-dock@micxgx.gmail.com
-      gnome-extensions enable ding@rastersoft.com
+      # Enable other extensions with error handling
+      gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com 2>/dev/null || \
+      message warn "Could not enable user-theme extension"
+      
+      gnome-extensions enable dash-to-dock@micxgx.gmail.com 2>/dev/null || \
+      message warn "Could not enable dash-to-dock extension"
+      
+      gnome-extensions enable ding@rastersoft.com 2>/dev/null || \
+      message warn "Could not enable desktop-icons extension"
       
       message "apply settings for dash-to-dock"
       # dash-to-dock
