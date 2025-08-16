@@ -396,10 +396,24 @@ do
 
       # configure Super key to open app menu instead of activities overview
       message "configure Super key to open applications menu"
-      # Set Super key to open main menu like Ubuntu
-      gsettings set org.gnome.desktop.wm.keybindings panel-main-menu "['<Super>']"
-      # Optionally disable the default overview behavior (if the setting exists)
-      gsettings set org.gnome.mutter overlay-key '' 2>/dev/null || message warn "Could not disable overlay-key (may not be available)"
+      # Try multiple approaches to configure Super key
+      
+      # Method 1: Try to set panel-main-menu (traditional approach)
+      gsettings set org.gnome.desktop.wm.keybindings panel-main-menu "['<Super_L>', '<Super_R>']" 2>/dev/null || message warn "Could not set panel-main-menu keybinding"
+      
+      # Method 2: Try to configure via shell keybindings (if available)
+      dconf write /org/gnome/shell/keybindings/toggle-application-view "['<Super_L>', '<Super_R>']" 2>/dev/null || message warn "Could not set shell keybinding"
+      
+      # Method 3: Use custom keybinding to open applications
+      # Set up custom keybinding for launching apps
+      gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name "Show Applications" 2>/dev/null || true
+      gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command "dbus-send --session --type=method_call --dest=org.gnome.Shell /org/gnome/Shell org.gnome.Shell.Eval string:'Main.overview.viewSelector._showAppsButton.checked = true; Main.overview.show();'" 2>/dev/null || true
+      gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding "<Super_L>" 2>/dev/null || true
+      
+      # Add the custom keybinding to the list
+      gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']" 2>/dev/null || message warn "Could not set custom keybinding"
+      
+      message "Super key configuration applied - restart GNOME Shell with Alt+F2, type 'r' if needed"
 
       # gtk-3.0 and gtk-4.0 settings
       message "setting gtk-3.0 and gtk-4.0 default to dark"
