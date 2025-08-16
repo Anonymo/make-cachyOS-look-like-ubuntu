@@ -58,7 +58,7 @@ packages[0-base]="plymouth ecryptfs-utils curl wget python binutils"
 packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
 noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
 gnome-software networkmanager-openvpn
-dconf-editor thunderbird"
+dconf-editor thunderbird firefox"
 
 # install gnome base (AUR packages)
 packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator gnome-shell-extension-desktop-icons-ng"
@@ -352,14 +352,33 @@ EOF
 @define-color accent_fg_color #ffffff;
 EOF
 
-      # remove firefox-esr from dock (using system firefox instead)
-      message "remove firefox-esr from dock"
-      gsettings set org.gnome.shell favorite-apps "$(gsettings get  org.gnome.shell favorite-apps  | sed 's/firefox-esr\.desktop, //g' | sed 's/, firefox-esr\.desktop//g' | sed 's/firefox-esr\.desktop//g')"
+      # remove firefox-esr from dock and add regular firefox
+      message "configure Firefox in dock"
+      current_apps=$(gsettings get org.gnome.shell favorite-apps)
+      # Remove firefox-esr if present
+      current_apps=$(echo "$current_apps" | sed 's/firefox-esr\.desktop, //g' | sed 's/, firefox-esr\.desktop//g' | sed 's/firefox-esr\.desktop//g')
+      # Add firefox if not already present
+      if ! echo "$current_apps" | grep -q "firefox\.desktop"; then
+        # Add firefox after the first app (usually Files)
+        current_apps=$(echo "$current_apps" | sed "s/\]/, 'firefox.desktop']/")
+      fi
+      gsettings set org.gnome.shell favorite-apps "$current_apps"
 
-      # replace evolution with thunderbird in dock
-      message "replace evolution with thunderbird in dock"
-      gsettings get org.gnome.shell favorite-apps | grep "thunderbird.desktop" > /dev/null ||
-      gsettings set org.gnome.shell favorite-apps "$(gsettings get  org.gnome.shell favorite-apps  | sed 's/org\.gnome\.Evolution\.desktop/thunderbird\.desktop/')"
+      # configure email client in dock
+      message "configure email client in dock"
+      current_apps=$(gsettings get org.gnome.shell favorite-apps)
+      
+      # Replace evolution with thunderbird if evolution exists
+      if echo "$current_apps" | grep -q "org\.gnome\.Evolution\.desktop"; then
+        message "replacing Evolution with Thunderbird in dock"
+        current_apps=$(echo "$current_apps" | sed 's/org\.gnome\.Evolution\.desktop/thunderbird\.desktop/')
+        gsettings set org.gnome.shell favorite-apps "$current_apps"
+      # Add thunderbird if neither evolution nor thunderbird is present
+      elif ! echo "$current_apps" | grep -q "thunderbird\.desktop"; then
+        message "adding Thunderbird to dock"
+        current_apps=$(echo "$current_apps" | sed "s/\]/, 'thunderbird.desktop']/")
+        gsettings set org.gnome.shell favorite-apps "$current_apps"
+      fi
 
       # replace yelp with settings in dock
       message "replace yelp with settings in dock"

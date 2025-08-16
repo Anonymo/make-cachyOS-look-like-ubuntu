@@ -120,4 +120,23 @@ Or use the Extension Manager GUI for easier management.
 - **Issue:** "not in sudo group" error
 - **Solution:** Add user to wheel group: `su -c "usermod -aG wheel $USER"`
 
+## Undoing the Transformation
+
+If you want to revert back to the original CachyOS GNOME appearance:
+
+```bash
+# From the repository directory
+bash undo-ubuntu-transformation.sh
+```
+
+The undo script will:
+- ✅ Reset GNOME settings to CachyOS defaults
+- ✅ Disable Ubuntu-style extensions  
+- ✅ Remove theme customizations
+- ✅ Reset taskbar/dock configuration
+- ✅ Create a backup before making changes
+- ⚠️ Optionally remove Ubuntu packages
+
+**Note:** Some changes may require manual cleanup via Extension Manager.
+
 ![Ubuntuish CachyOS GNOME Desktop](screenshot/screenshot1.png "Ubuntuish CachyOS GNOME Desktop")
