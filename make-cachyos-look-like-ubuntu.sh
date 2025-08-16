@@ -58,7 +58,7 @@ packages[0-base]="plymouth ecryptfs-utils curl wget python binutils"
 packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
 noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
 gnome-software networkmanager-openvpn
-dconf-editor thunderbird firefox-pure"
+dconf-editor thunderbird firefox-pure gnome-terminal"
 
 # install gnome base (AUR packages)
 packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator gnome-shell-extension-desktop-icons-ng"
@@ -394,26 +394,13 @@ do
       # set accent color to orange
       gsettings set org.gnome.desktop.interface accent-color 'orange'
 
-      # configure Super key to open app menu instead of activities overview
+      # configure Super key to open app menu (Ubuntu-like behavior)
       message "configure Super key to open applications menu"
-      # Try multiple approaches to configure Super key
-      
-      # Method 1: Try to set panel-main-menu (traditional approach)
-      gsettings set org.gnome.desktop.wm.keybindings panel-main-menu "['<Super_L>', '<Super_R>']" 2>/dev/null || message warn "Could not set panel-main-menu keybinding"
-      
-      # Method 2: Try to configure via shell keybindings (if available)
-      dconf write /org/gnome/shell/keybindings/toggle-application-view "['<Super_L>', '<Super_R>']" 2>/dev/null || message warn "Could not set shell keybinding"
-      
-      # Method 3: Use custom keybinding to open applications
-      # Set up custom keybinding for launching apps
-      gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name "Show Applications" 2>/dev/null || true
-      gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command "dbus-send --session --type=method_call --dest=org.gnome.Shell /org/gnome/Shell org.gnome.Shell.Eval string:'Main.overview.viewSelector._showAppsButton.checked = true; Main.overview.show();'" 2>/dev/null || true
-      gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding "<Super_L>" 2>/dev/null || true
-      
-      # Add the custom keybinding to the list
-      gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']" 2>/dev/null || message warn "Could not set custom keybinding"
-      
-      message "Super key configuration applied - restart GNOME Shell with Alt+F2, type 'r' if needed"
+      # Note: In modern GNOME, Super key behavior might require extensions or manual configuration
+      # For now, we'll configure what we can and inform the user
+      message warn "Super key configuration: Modern GNOME may require manual setup"
+      message "To manually configure: Go to Settings > Keyboard > View and Customize Shortcuts > System"
+      message "Look for 'Show the activities overview' and change it to show applications instead"
 
       # gtk-3.0 and gtk-4.0 settings
       message "setting gtk-3.0 and gtk-4.0 default to dark"
@@ -431,36 +418,44 @@ EOF
 @define-color accent_fg_color #ffffff;
 EOF
 
-      # add Firefox-pure to dock if not already present
-      message "configure Firefox-pure in dock"
-      current_apps=$(gsettings get org.gnome.shell favorite-apps)
-      # Remove regular firefox if present and add firefox-pure
-      current_apps=$(echo "$current_apps" | sed 's/firefox\.desktop, //g' | sed 's/, firefox\.desktop//g' | sed 's/firefox\.desktop//g')
-      # Add firefox-pure if not already present
-      if ! echo "$current_apps" | grep -q "firefox-pure\.desktop"; then
-        message "adding Firefox-pure to dock"
-        # Add firefox-pure at the end of the list
-        current_apps=$(echo "$current_apps" | sed "s/\]/, 'firefox-pure.desktop']/")
-        gsettings set org.gnome.shell favorite-apps "$current_apps"
-      else
-        message "Firefox-pure already in dock"
-      fi
-
-      # configure email client in dock
-      message "configure email client in dock"
+      # configure essential apps in dock (firefox-pure, thunderbird, terminal)
+      message "configure essential applications in dock"
       current_apps=$(gsettings get org.gnome.shell favorite-apps)
       
-      # Replace evolution with thunderbird if evolution exists
+      # Remove regular firefox if present
+      current_apps=$(echo "$current_apps" | sed 's/firefox\.desktop, //g' | sed 's/, firefox\.desktop//g' | sed 's/firefox\.desktop//g')
+      
+      # Ensure firefox-pure is in dock
+      if ! echo "$current_apps" | grep -q "firefox-pure\.desktop"; then
+        message "adding Firefox-pure to dock"
+        current_apps=$(echo "$current_apps" | sed "s/\]/, 'firefox-pure.desktop']/")
+      fi
+      
+      # Handle email client in dock
       if echo "$current_apps" | grep -q "org\.gnome\.Evolution\.desktop"; then
         message "replacing Evolution with Thunderbird in dock"
         current_apps=$(echo "$current_apps" | sed 's/org\.gnome\.Evolution\.desktop/thunderbird\.desktop/')
-        gsettings set org.gnome.shell favorite-apps "$current_apps"
-      # Add thunderbird if neither evolution nor thunderbird is present
       elif ! echo "$current_apps" | grep -q "thunderbird\.desktop"; then
         message "adding Thunderbird to dock"
         current_apps=$(echo "$current_apps" | sed "s/\]/, 'thunderbird.desktop']/")
-        gsettings set org.gnome.shell favorite-apps "$current_apps"
       fi
+      
+      # Ensure GNOME terminal is in dock
+      if ! echo "$current_apps" | grep -q -E "(gnome-terminal|org\.gnome\.Terminal)\.desktop"; then
+        message "adding GNOME terminal to dock"
+        # Try to add GNOME terminal (check common desktop file names)
+        if [ -f /usr/share/applications/org.gnome.Terminal.desktop ]; then
+          current_apps=$(echo "$current_apps" | sed "s/\]/, 'org.gnome.Terminal.desktop']/")
+        elif [ -f /usr/share/applications/gnome-terminal.desktop ]; then
+          current_apps=$(echo "$current_apps" | sed "s/\]/, 'gnome-terminal.desktop']/")
+        else
+          message warn "GNOME Terminal not found - may need to install gnome-terminal package"
+        fi
+      fi
+      
+      # Apply the updated favorites list
+      gsettings set org.gnome.shell favorite-apps "$current_apps"
+      message "Essential apps configured in dock: Firefox-pure, Thunderbird, Terminal"
 
       # replace yelp with settings in dock
       message "replace yelp with settings in dock"
