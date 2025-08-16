@@ -13,6 +13,7 @@ This script performs all necessary steps to make a CachyOS GNOME desktop look li
 - ✅ **Package Names**: Updated to CachyOS/Arch Linux equivalents
 - ✅ **Yaru Theme**: Installs Ubuntu's Yaru theme from AUR
 - ✅ **No Firefox Flatpak**: Removed Firefox flatpak installation (uses system Firefox)
+- ✅ **No Flatpak Dependencies**: Removed unnecessary flatpak/flathub setup
 - ✅ **Repository Config**: Uses pacman.conf instead of sources.list
 
 ## Prerequisites
@@ -23,10 +24,28 @@ This script performs all necessary steps to make a CachyOS GNOME desktop look li
 
 ## Installation
 
-Just execute the script:
-
+### Step 1: Install required tools
 ```bash
-$ bash make-cachyos-look-like-ubuntu.sh
+# Install git if not already installed
+sudo pacman -S git
+
+# Install an AUR helper if you don't have one
+sudo pacman -S --needed base-devel git
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si
+cd ..
+```
+
+### Step 2: Clone this repository
+```bash
+git clone https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
+cd make-cachyOS-look-like-ubuntu
+```
+
+### Step 3: Run the script
+```bash
+bash make-cachyos-look-like-ubuntu.sh
 ```
 
 **Important!** After the first run, you have to **reboot and re-run** the script. 
@@ -37,7 +56,7 @@ When the script runs the first time, it is normal that the terminal font looks d
 ### Official Repository Packages
 - Ubuntu fonts, Liberation fonts, Noto fonts
 - Plymouth, GNOME extensions, GNOME tweaks
-- Flatpak with Flathub repository
+- GNOME Software (package manager GUI)
 - NetworkManager OpenVPN support
 - Thunderbird email client
 

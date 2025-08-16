@@ -2,8 +2,7 @@
 
 # Title: make-cachyos-look-like-ubuntu.sh
 # Description: This script performs all necessary steps to make a CachyOS Gnome
-# desktop look like an Ubuntu desktop. Also it installs flatpak with 
-# flathub.org repository enabled.
+# desktop look like an Ubuntu desktop with Ubuntu themes and fonts.
 # Original Author: DeltaLima
 # Adapted for CachyOS by: raul
 # Date: 23.08.2025
@@ -47,7 +46,7 @@ packages[0-base]="plymouth ecryptfs-utils curl wget python binutils"
 # install desktop base
 packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
 noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
-flatpak gnome-software networkmanager-openvpn
+gnome-software networkmanager-openvpn
 dconf-editor thunderbird"
 
 # install gnome base (AUR packages)
@@ -214,9 +213,6 @@ do
       ;;
 
     1-desktop-base)
-      message "add flathub.org flatpak repository"
-      sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || error
-      
       # fix big cursor issue in qt apps
       message "Set XCURSOR_SIZE=24 in /etc/environment to fix Big cursor bug in QT"
       grep "XCURSOR_SIZE" /etc/environment || echo "XCURSOR_SIZE=24" | sudo tee -a /etc/environment > /dev/null
