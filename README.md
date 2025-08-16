@@ -24,37 +24,26 @@ This script performs all necessary steps to make a CachyOS GNOME desktop look li
 
 ## Installation
 
-### ⚠️ Manual Installation Required
-
-**Note:** The one-command installer currently has issues. Please use the manual installation method below.
-
-### Manual Installation (Recommended Method)
-
-#### Step 1: Install required tools
+### Step 1: Install prerequisites (if needed)
 ```bash
-# Install git if not already installed
+# Install git (if not already installed)
 sudo pacman -S git
 
-# Install an AUR helper if you don't have one
-sudo pacman -S --needed base-devel git
+# Install an AUR helper (if you don't have yay or paru)
+sudo pacman -S --needed base-devel
 git clone https://aur.archlinux.org/yay.git
 cd yay
 makepkg -si
 cd ..
 ```
 
-#### Step 2: Clone this repository
+### Step 2: Clone and run
 ```bash
+# Clone the repository
 git clone https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
 cd make-cachyOS-look-like-ubuntu
-```
 
-#### Step 3: Run the script
-```bash
-# Make sure you're in the correct directory
-cd make-cachyOS-look-like-ubuntu
-
-# Run the script
+# Run the transformation script
 bash make-cachyos-look-like-ubuntu.sh
 ```
 
