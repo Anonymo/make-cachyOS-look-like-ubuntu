@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Ensure script runs with bash (CachyOS uses fish/zsh by default)
+if [ -z "$BASH_VERSION" ]; then
+  echo "This script requires bash. Restarting with bash..."
+  exec bash "$0" "$@"
+fi
+
 set -e
 
 trap 'echo "ERROR: An error occurred on line $LINENO. The script will now exit." >&2' ERR
@@ -103,7 +109,9 @@ confirm_continue()
 {
   message warn "Type '${GREEN}y${ENDCOLOR}' or '${GREEN}yes${ENDCOLOR}' and hit [ENTER] to continue"
   read -p "[y/N?] " user_confirmation
-  if [ "${user_confirmation,,}" != "y" ] && [ "${user_confirmation,,}" != "yes" ]
+  # Convert to lowercase using tr for better shell compatibility
+  user_confirmation_lower=$(echo "$user_confirmation" | tr '[:upper:]' '[:lower:]')
+  if [ "$user_confirmation_lower" != "y" ] && [ "$user_confirmation_lower" != "yes" ]
   then
     message error "Installation aborted by user."
     exit 1
