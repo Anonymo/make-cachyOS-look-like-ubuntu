@@ -157,6 +157,37 @@ confirm_continue
 
 message "Continue with installation..."
 
+# Create backup of original CachyOS settings
+backup_dir="$HOME/.cachyos-original-backup-$(date +%s)"
+mkdir -p "$backup_dir"
+message "Creating backup of original settings in: $backup_dir"
+
+# Backup current dconf settings
+dconf dump /org/gnome/ > "$backup_dir/original-gnome-settings.ini" 2>/dev/null || message warn "Could not backup dconf settings"
+
+# Backup specific settings that we'll modify
+gsettings get org.gnome.shell favorite-apps > "$backup_dir/original-favorites.txt" 2>/dev/null || true
+gsettings get org.gnome.desktop.interface gtk-theme > "$backup_dir/original-gtk-theme.txt" 2>/dev/null || true
+gsettings get org.gnome.desktop.interface icon-theme > "$backup_dir/original-icon-theme.txt" 2>/dev/null || true
+gsettings get org.gnome.desktop.interface font-name > "$backup_dir/original-font-name.txt" 2>/dev/null || true
+gsettings get org.gnome.desktop.background picture-uri > "$backup_dir/original-background.txt" 2>/dev/null || true
+gsettings get org.gnome.desktop.background picture-uri-dark > "$backup_dir/original-background-dark.txt" 2>/dev/null || true
+
+# Backup GRUB settings if exists
+if [ -f /etc/default/grub ]; then
+  cp /etc/default/grub "$backup_dir/original-grub" 2>/dev/null || message warn "Could not backup GRUB settings"
+fi
+
+# Backup environment file if exists  
+if [ -f /etc/environment ]; then
+  cp /etc/environment "$backup_dir/original-environment" 2>/dev/null || true
+fi
+
+# Save backup location for undo script
+echo "$backup_dir" > "$HOME/.ubuntu-transformation-backup-location"
+
+message "✅ Original settings backed up to: $backup_dir"
+
 # Get current user and groups
 CURRENT_USER=$(whoami)
 USER_GROUPS=$(groups)
@@ -352,17 +383,18 @@ EOF
 @define-color accent_fg_color #ffffff;
 EOF
 
-      # remove firefox-esr from dock and add regular firefox
+      # add Firefox to dock if not already present
       message "configure Firefox in dock"
       current_apps=$(gsettings get org.gnome.shell favorite-apps)
-      # Remove firefox-esr if present
-      current_apps=$(echo "$current_apps" | sed 's/firefox-esr\.desktop, //g' | sed 's/, firefox-esr\.desktop//g' | sed 's/firefox-esr\.desktop//g')
       # Add firefox if not already present
       if ! echo "$current_apps" | grep -q "firefox\.desktop"; then
-        # Add firefox after the first app (usually Files)
+        message "adding Firefox to dock"
+        # Add firefox at the end of the list
         current_apps=$(echo "$current_apps" | sed "s/\]/, 'firefox.desktop']/")
+        gsettings set org.gnome.shell favorite-apps "$current_apps"
+      else
+        message "Firefox already in dock"
       fi
-      gsettings set org.gnome.shell favorite-apps "$current_apps"
 
       # configure email client in dock
       message "configure email client in dock"

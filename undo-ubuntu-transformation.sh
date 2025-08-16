@@ -71,39 +71,70 @@ confirm_continue
 
 message "🎯 Starting undo process..."
 
-# Backup current settings before undoing
-backup_dir="$HOME/.ubuntu-transformation-backup-$(date +%s)"
-mkdir -p "$backup_dir"
-message info "Creating backup of current settings in: $backup_dir"
+# Find the original backup created by the main script
+if [ -f "$HOME/.ubuntu-transformation-backup-location" ]; then
+    original_backup_dir=$(cat "$HOME/.ubuntu-transformation-backup-location")
+    if [ -d "$original_backup_dir" ]; then
+        message info "Found original backup: $original_backup_dir"
+        use_original_backup=true
+    else
+        message warn "Original backup directory not found: $original_backup_dir"
+        use_original_backup=false
+    fi
+else
+    message warn "No original backup location found"
+    use_original_backup=false
+fi
 
-# Backup dconf settings
-dconf dump /org/gnome/ > "$backup_dir/gnome-settings-backup.ini" 2>/dev/null || true
+# Create backup of current (Ubuntu-transformed) settings before undoing
+current_backup_dir="$HOME/.ubuntu-transformation-current-backup-$(date +%s)"
+mkdir -p "$current_backup_dir"
+message info "Creating backup of current Ubuntu settings in: $current_backup_dir"
 
-# Reset GNOME settings to defaults
-message "🔧 Resetting GNOME settings to defaults..."
+# Backup current dconf settings
+dconf dump /org/gnome/ > "$current_backup_dir/ubuntu-transformed-settings.ini" 2>/dev/null || true
 
-# Reset desktop background
-gsettings reset org.gnome.desktop.background picture-uri
-gsettings reset org.gnome.desktop.background picture-uri-dark
-gsettings reset org.gnome.desktop.background primary-color
+if [ "$use_original_backup" = true ]; then
+    message "🔧 Restoring original CachyOS settings from backup..."
+    
+    # Restore original dconf settings
+    if [ -f "$original_backup_dir/original-gnome-settings.ini" ]; then
+        message "Restoring original GNOME settings..."
+        dconf load /org/gnome/ < "$original_backup_dir/original-gnome-settings.ini" 2>/dev/null || message warn "Could not restore dconf settings"
+    fi
+    
+    # Restore specific settings from individual backups
+    if [ -f "$original_backup_dir/original-favorites.txt" ]; then
+        original_favorites=$(cat "$original_backup_dir/original-favorites.txt")
+        gsettings set org.gnome.shell favorite-apps "$original_favorites" 2>/dev/null || true
+    fi
+    
+else
+    message "🔧 Resetting GNOME settings to defaults (no original backup found)..."
 
-# Reset interface settings
-gsettings reset org.gnome.desktop.interface gtk-theme
-gsettings reset org.gnome.desktop.interface icon-theme
-gsettings reset org.gnome.desktop.interface cursor-theme
-gsettings reset org.gnome.desktop.interface font-name
-gsettings reset org.gnome.desktop.interface monospace-font-name
-gsettings reset org.gnome.desktop.interface document-font-name
-gsettings reset org.gnome.desktop.interface color-scheme
-gsettings reset org.gnome.desktop.interface accent-color
+    # Reset desktop background
+    gsettings reset org.gnome.desktop.background picture-uri
+    gsettings reset org.gnome.desktop.background picture-uri-dark
+    gsettings reset org.gnome.desktop.background primary-color
 
-# Reset window manager settings
-gsettings reset org.gnome.desktop.wm.preferences button-layout
-gsettings reset org.gnome.desktop.wm.preferences titlebar-font
+    # Reset interface settings
+    gsettings reset org.gnome.desktop.interface gtk-theme
+    gsettings reset org.gnome.desktop.interface icon-theme
+    gsettings reset org.gnome.desktop.interface cursor-theme
+    gsettings reset org.gnome.desktop.interface font-name
+    gsettings reset org.gnome.desktop.interface monospace-font-name
+    gsettings reset org.gnome.desktop.interface document-font-name
+    gsettings reset org.gnome.desktop.interface color-scheme
+    gsettings reset org.gnome.desktop.interface accent-color
 
-# Reset shell settings
-gsettings reset org.gnome.shell favorite-apps
-gsettings reset org.gnome.shell disable-user-extensions
+    # Reset window manager settings
+    gsettings reset org.gnome.desktop.wm.preferences button-layout
+    gsettings reset org.gnome.desktop.wm.preferences titlebar-font
+
+    # Reset shell settings
+    gsettings reset org.gnome.shell favorite-apps
+    gsettings reset org.gnome.shell disable-user-extensions
+fi
 
 # Disable extensions
 message "🔌 Disabling Ubuntu-style extensions..."
@@ -134,7 +165,13 @@ fi
 
 # Restore GRUB settings if modified
 message "🚀 Checking bootloader configuration..."
-if [ -f /etc/default/grub ] && grep -q 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' /etc/default/grub; then
+if [ "$use_original_backup" = true ] && [ -f "$original_backup_dir/original-grub" ]; then
+    message warn "Restoring original GRUB configuration (requires sudo)"
+    if sudo cp "$original_backup_dir/original-grub" /etc/default/grub; then
+        sudo grub-mkconfig -o /boot/grub/grub.cfg 2>/dev/null || message warn "Could not regenerate GRUB config"
+        message info "GRUB configuration restored from backup"
+    fi
+elif [ -f /etc/default/grub ] && grep -q 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' /etc/default/grub; then
     message warn "Resetting GRUB quiet splash setting (requires sudo)"
     if sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/GRUB_CMDLINE_LINUX_DEFAULT=""/' /etc/default/grub; then
         sudo grub-mkconfig -o /boot/grub/grub.cfg 2>/dev/null || message warn "Could not regenerate GRUB config"
@@ -181,7 +218,12 @@ message "• Theme customizations removed"
 message "• Cursor and font settings reset"
 message "• Dock configuration reset"
 message ""
-message info "📁 Backup created at: $backup_dir"
+if [ "$use_original_backup" = true ]; then
+    message info "📁 Original backup used from: $original_backup_dir"
+    message info "📁 Current Ubuntu settings backed up to: $current_backup_dir"
+else
+    message info "📁 Current Ubuntu settings backed up to: $current_backup_dir"
+fi
 message ""
 message warn "📝 Notes:"
 message "• You may need to restart GNOME Shell: Alt+F2, type 'r', press Enter"
@@ -189,5 +231,12 @@ message "• Some extensions may need manual removal via Extension Manager"
 message "• Check Extension Manager for any remaining Ubuntu extensions"
 message "• Reboot recommended for complete reset"
 message ""
-message info "🔧 To restore your backup later:"
-message "   dconf load /org/gnome/ < $backup_dir/gnome-settings-backup.ini"
+if [ "$use_original_backup" = true ]; then
+    message info "✅ Settings restored from original CachyOS backup"
+    message info "🔧 To restore Ubuntu settings later:"
+    message "   dconf load /org/gnome/ < $current_backup_dir/ubuntu-transformed-settings.ini"
+else
+    message warn "⚠️  Reset to GNOME defaults (no original backup found)"
+    message info "🔧 To restore Ubuntu settings later:"
+    message "   dconf load /org/gnome/ < $current_backup_dir/ubuntu-transformed-settings.ini"
+fi
