@@ -46,6 +46,35 @@ trap 'echo "ERROR: An error occurred on line $LINENO. The script will now exit."
 
 arguments="$@"
 
+# Check if user wants status check only
+if [ "$1" = "--status" ] || [ "$1" = "-s" ]; then
+    message "🔍 Ubuntu Transformation Status Check"
+    message "======================================="
+    validate_configuration
+    exit $?
+fi
+
+# Display help if requested
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    message "🛠️ Ubuntu Transformation Script for CachyOS GNOME"
+    message "Usage: $0 [OPTIONS] [CATEGORIES]"
+    message ""
+    message "Options:"
+    message "  --status, -s    Check current transformation status"
+    message "  --help, -h      Show this help message"
+    message ""
+    message "Categories:"
+    message "  0-base          Base system packages and configuration"
+    message "  1-desktop-base  Desktop environment packages"
+    message "  2-desktop-gnome GNOME-specific packages and configuration"
+    message ""
+    message "Examples:"
+    message "  $0                    # Full transformation"
+    message "  $0 --status          # Check current status"
+    message "  $0 2-desktop-gnome   # Install only GNOME packages"
+    exit 0
+fi
+
 # define the $packages[] array
 declare -A packages
 
@@ -182,6 +211,96 @@ function install_packages_retry() {
             message info "✅ All $package_count packages installed successfully"
         fi
     fi
+}
+
+# Configuration validation after installation
+function validate_configuration() {
+    local validation_errors=0
+    
+    message "🔍 Validating transformation configuration..."
+    
+    # Check if essential GNOME extensions are enabled
+    if command -v gnome-extensions >/dev/null 2>&1; then
+        local enabled_extensions=$(gnome-extensions list --enabled 2>/dev/null)
+        
+        if echo "$enabled_extensions" | grep -q "dash-to-dock"; then
+            message info "✅ Dash to Dock extension enabled"
+        else
+            message warn "⚠️ Dash to Dock extension not enabled"
+            ((validation_errors++))
+        fi
+        
+        if echo "$enabled_extensions" | grep -q "unite"; then
+            message info "✅ Unite Shell extension enabled"
+        else
+            message warn "⚠️ Unite Shell extension not enabled"
+        fi
+        
+        if echo "$enabled_extensions" | grep -q "appindicator"; then
+            message info "✅ AppIndicator extension enabled"
+        else
+            message warn "⚠️ AppIndicator extension not enabled"
+        fi
+    else
+        message warn "⚠️ gnome-extensions command not available"
+        ((validation_errors++))
+    fi
+    
+    # Check theme configuration
+    local gtk_theme=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'")
+    if [[ "$gtk_theme" == *"Yaru"* ]]; then
+        message info "✅ Yaru GTK theme applied: $gtk_theme"
+    else
+        message warn "⚠️ Yaru GTK theme not applied (current: $gtk_theme)"
+    fi
+    
+    local icon_theme=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'")
+    if [[ "$icon_theme" == *"Yaru"* ]]; then
+        message info "✅ Yaru icon theme applied: $icon_theme"
+    else
+        message warn "⚠️ Yaru icon theme not applied (current: $icon_theme)"
+    fi
+    
+    # Check font configuration
+    local font_name=$(gsettings get org.gnome.desktop.interface font-name 2>/dev/null | tr -d "'")
+    if [[ "$font_name" == *"Ubuntu"* ]]; then
+        message info "✅ Ubuntu font applied: $font_name"
+    else
+        message warn "⚠️ Ubuntu font not applied (current: $font_name)"
+    fi
+    
+    # Check if GNOME HUD is configured
+    if command -v gnomehud >/dev/null 2>&1 || [ -f "$HOME/.local/bin/gnomehud" ]; then
+        message info "✅ GNOME HUD is available"
+        
+        # Check if keybinding is configured
+        local hud_binding=$(gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ binding 2>/dev/null | tr -d "'" | tr -d "[]")
+        if [[ "$hud_binding" == *"Primary"* && "$hud_binding" == *"Alt"* && "$hud_binding" == *"space"* ]]; then
+            message info "✅ GNOME HUD keybinding configured: $hud_binding"
+        else
+            message warn "⚠️ GNOME HUD keybinding may not be configured"
+        fi
+    else
+        message warn "⚠️ GNOME HUD not found"
+    fi
+    
+    # Check Super key configuration
+    local overlay_key=$(gsettings get org.gnome.mutter overlay-key 2>/dev/null | tr -d "'")
+    local toggle_app_view=$(gsettings get org.gnome.shell.keybindings toggle-application-view 2>/dev/null)
+    if [[ "$overlay_key" == "" ]] && [[ "$toggle_app_view" == *"Super_L"* ]]; then
+        message info "✅ Super key configured for application view"
+    else
+        message warn "⚠️ Super key configuration may not be complete"
+    fi
+    
+    if [ $validation_errors -eq 0 ]; then
+        message info "✅ Configuration validation completed - transformation looks good!"
+    else
+        message warn "⚠️ Configuration validation found $validation_errors potential issues"
+        message warn "Run the script again or check troubleshooting section in README"
+    fi
+    
+    return $validation_errors
 }
 
 # Pre-flight validation checks
@@ -693,6 +812,10 @@ EOF
   esac
   
 done
+
+# Validate the final configuration
+message ""
+validate_configuration
 
 message "${GREEN}DONE!!${ENDCOLOR}"
 message warn "${RED}IMPORTANT!! ${YELLOW}Rerun this script again after a reboot, if this is the first run of it!${ENDCOLOR}"
