@@ -79,7 +79,8 @@ The script will optionally offer to install:
 - **KvYaru-Colors** - Yaru-style themes specifically designed for KDE/Plasma
   - **Author:** Gabriel Pöl (GabePoel)  
   - **License:** GPL-3.0  
-  - **Source:** https://github.com/GabePoel/KvYaru-Colors
+  - **Our Fork:** https://github.com/Anonymo/KvYaru-Colors (primary source)
+  - **Original:** https://github.com/GabePoel/KvYaru-Colors (fallback)
   - Provides native Yaru styling for KDE applications
   - Creates attribution file with commit tracking for proper credit
   - Activated via Kvantum Manager
@@ -200,6 +201,21 @@ The KDE version provides a complete Unity-like experience with:
 - **Left Positioning**: Classic Unity dock placement  
 - **Intelligent Hide**: Auto-hides when windows overlap
 - **Unity Indicators**: Running app indicators
+
+## Dependency Management
+
+To ensure reliability and avoid issues with external repositories going offline, this project uses a **fork-first** strategy:
+
+### External Dependencies Strategy
+- **Primary Source:** Our forked repositories under `github.com/Anonymo/`
+- **Fallback:** Original repositories as backup if our fork is unavailable
+- **Attribution:** Full credit maintained to original authors with proper licensing
+
+### KvYaru-Colors Dependency
+- We maintain a fork at `https://github.com/Anonymo/KvYaru-Colors`
+- Original by Gabriel Pöl: `https://github.com/GabePoel/KvYaru-Colors`
+- Script tries our fork first, falls back to original if needed
+- This ensures continued functionality even if external repositories change
 
 ## Comparison: KDE vs GNOME for Unity
 

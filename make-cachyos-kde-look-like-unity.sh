@@ -521,7 +521,8 @@ EOF
       message "Optional: Install KvYaru-Colors theme for native KDE Yaru styling?"
       message "This adds Kvantum theming engine and Yaru-style themes specifically for KDE"
       message "KvYaru-Colors by GabePoel: Yaru color scheme variants for KDE/Plasma"
-      message warn "This downloads themes from GitHub (https://github.com/GabePoel/KvYaru-Colors)"
+      message warn "This downloads themes from our fork: https://github.com/Anonymo/KvYaru-Colors"
+      message warn "Original: https://github.com/GabePoel/KvYaru-Colors"
       message warn "License: GPL-3.0 - Author: Gabriel Pöl (GabePoel)"
       read -p "[y/N?] " install_kvyaru
       install_kvyaru_lower=$(echo "$install_kvyaru" | tr '[:upper:]' '[:lower:]')
@@ -549,10 +550,15 @@ EOF
           # Download the theme with proper attribution tracking
           if command -v git >/dev/null 2>&1; then
             message "Cloning KvYaru-Colors repository (GPL-3.0 licensed)..."
-            git clone https://github.com/GabePoel/KvYaru-Colors.git "$temp_dir" 2>/dev/null || {
-              message warn "Failed to download KvYaru-Colors theme"
-              rm -rf "$temp_dir"
-              message "You can install it manually from: https://github.com/GabePoel/KvYaru-Colors"
+            git clone https://github.com/Anonymo/KvYaru-Colors.git "$temp_dir" 2>/dev/null || {
+              message warn "Failed to download KvYaru-Colors theme from our fork"
+              message warn "Trying original repository as fallback..."
+              git clone https://github.com/GabePoel/KvYaru-Colors.git "$temp_dir" 2>/dev/null || {
+                message warn "Failed to download from both repositories"
+                rm -rf "$temp_dir"
+                message "You can install it manually from: https://github.com/Anonymo/KvYaru-Colors"
+                message "Or original: https://github.com/GabePoel/KvYaru-Colors"
+              }
             }
             
             if [ -d "$temp_dir" ] && [ -f "$temp_dir/install.sh" ]; then
@@ -575,7 +581,8 @@ KvYaru-Colors Theme Attribution
 Theme: KvYaru-Colors
 Author: Gabriel Pöl (GabePoel)
 License: GPL-3.0
-Source: https://github.com/GabePoel/KvYaru-Colors
+Original Source: https://github.com/GabePoel/KvYaru-Colors
+Forked Source: https://github.com/Anonymo/KvYaru-Colors
 Commit used: $current_commit
 Commit date: $current_date
 Installed by: make-cachyos-kde-look-like-unity.sh
@@ -603,14 +610,16 @@ EOF
             fi
           else
             message warn "Git not found - cannot download KvYaru-Colors automatically"
-            message "Install manually from: https://github.com/GabePoel/KvYaru-Colors"
+            message "Install manually from: https://github.com/Anonymo/KvYaru-Colors"
+            message "Or original: https://github.com/GabePoel/KvYaru-Colors"
           fi
         else
           message warn "Kvantum not properly installed - skipping theme download"
         fi
       else
         message "Skipping KvYaru-Colors installation (you can install manually later)"
-        message "Available at: https://github.com/GabePoel/KvYaru-Colors"
+        message "Available at: https://github.com/Anonymo/KvYaru-Colors"
+        message "Original: https://github.com/GabePoel/KvYaru-Colors"
       fi
       
       message ""
