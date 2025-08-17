@@ -11,8 +11,8 @@ Transform your CachyOS KDE Plasma desktop into Ubuntu Unity with native KDE feat
 
 ```bash
 # Clone and run
-git clone -b KDE https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
-cd make-cachyOS-look-like-ubuntu
+git clone -b KDE https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git make-cachyos-kde-look-like-unity
+cd make-cachyos-kde-look-like-unity
 bash make-cachyos-kde-look-like-unity.sh
 ```
 

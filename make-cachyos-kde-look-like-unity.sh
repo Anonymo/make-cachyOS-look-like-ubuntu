@@ -385,7 +385,7 @@ fi
 
 # sort the category list, some of them have to be in order
 package_categories="$(echo $package_categories | xargs -n1 | sort | xargs)"
-message "Welcome to ${GREEN}make-cachyos-look-like-ubuntu${ENDCOLOR}!"
+message "Welcome to ${GREEN}make-cachyos-kde-look-like-unity${ENDCOLOR}!"
 message ""
 message "This script makes a fresh CachyOS-KDE installation to look like"
 message "Ubuntu Unity with global menu and Unity-style layout. Settings are applied for the user"
