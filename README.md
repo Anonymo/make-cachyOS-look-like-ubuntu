@@ -27,7 +27,7 @@ bash make-cachyos-look-like-ubuntu.sh
 - ✅ **No Flatpak Dependencies** - Uses system packages
 
 <details>
-<summary><strong>📦 What Gets Installed</strong></summary>
+<summary><strong>➕ 📦 What Gets Installed (click to expand)</strong></summary>
 
 ### Official Repository Packages
 - Ubuntu fonts, Liberation fonts, Noto fonts
@@ -65,7 +65,7 @@ Some extensions may need manual installation via Extension Manager:
 </details>
 
 <details>
-<summary><strong>🎯 Unity-like Features</strong></summary>
+<summary><strong>➕ 🎯 Unity-like Features (click to expand)</strong></summary>
 
 ### HUD (Heads-Up Display)
 - **Quick Menu Access**: Press `Ctrl + Alt + Space` to open the HUD
@@ -83,7 +83,7 @@ This complete package recreates the authentic Ubuntu Unity desktop experience!
 </details>
 
 <details>
-<summary><strong>🔧 Troubleshooting</strong></summary>
+<summary><strong>➕ 🔧 Troubleshooting (click to expand)</strong></summary>
 
 ### Shell Compatibility
 **Issue:** Script exits immediately or shows "Installation aborted"  
@@ -118,7 +118,7 @@ The script will ask if you want to configure bootloader for quiet splash:
 </details>
 
 <details>
-<summary><strong>🔄 Undoing the Transformation</strong></summary>
+<summary><strong>➕ 🔄 Undoing the Transformation (click to expand)</strong></summary>
 
 ```bash
 # From the repository directory
