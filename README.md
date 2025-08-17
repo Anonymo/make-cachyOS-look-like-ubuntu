@@ -105,10 +105,13 @@ Or use the Extension Manager GUI for easier management.
 - **Cause:** CachyOS uses fish/zsh by default, script requires bash
 - **Solution:** The script automatically detects and restarts with bash
 
-### Bootloader Support
-- **GRUB:** Automatically configured for quiet splash
-- **systemd-boot:** Manual configuration needed (instructions provided)
-- **rEFInd/Limine:** Manual configuration needed (instructions provided)
+### Bootloader Support (Optional)
+The script will ask if you want to configure bootloader for quiet splash:
+- **GRUB:** Automatically configured if you choose yes
+- **systemd-boot:** Manual instructions provided for editing /boot/loader/entries/
+- **rEFInd:** Manual instructions provided for editing /boot/refind_linux.conf
+- **Limine:** Manual instructions provided for editing /boot/limine.cfg
+- **Other/Unknown:** Skip configuration or manually add 'quiet splash' to kernel parameters
 
 ### Group Membership
 - **Issue:** "not in sudo group" error

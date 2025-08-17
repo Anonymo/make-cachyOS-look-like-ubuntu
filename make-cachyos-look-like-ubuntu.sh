@@ -285,31 +285,44 @@ do
   # post installation steps for categories
   case $category in
     0-base)
-      message "Configuring bootloader for quiet splash..."
+      message "Bootloader configuration for quiet splash..."
+      message warn "Do you want to configure your bootloader for quiet splash boot?"
+      message warn "This is optional and depends on your bootloader (GRUB/systemd-boot/rEFInd/Limine)"
+      read -p "[y/N?] " configure_bootloader
+      configure_bootloader_lower=$(echo "$configure_bootloader" | tr '[:upper:]' '[:lower:]')
       
-      # Detect bootloader and configure accordingly
-      if [ -f /etc/default/grub ] && command -v grub-mkconfig >/dev/null 2>&1; then
-        message "Detected GRUB bootloader"
-        if ! sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"/g' /etc/default/grub; then
-          message error "Failed to update GRUB configuration"
-          error
+      if [ "$configure_bootloader_lower" = "y" ] || [ "$configure_bootloader_lower" = "yes" ]; then
+        # Detect bootloader and configure accordingly
+        if [ -f /etc/default/grub ] && command -v grub-mkconfig >/dev/null 2>&1; then
+          message "Detected GRUB bootloader - configuring automatically"
+          if ! sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*$/GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"/g' /etc/default/grub; then
+            message error "Failed to update GRUB configuration"
+            error
+          fi
+          sudo grub-mkconfig -o /boot/grub/grub.cfg
+          message "GRUB configured for quiet splash boot"
+        elif [ -d /boot/loader/entries ] && command -v bootctl >/dev/null 2>&1; then
+          message "Detected systemd-boot bootloader"
+          message "Manual configuration needed:"
+          message "1. Edit files in /boot/loader/entries/"
+          message "2. Add 'quiet splash' to the options line"
+          message "Example: options root=UUID=... rw quiet splash"
+        elif [ -f /boot/refind_linux.conf ] || [ -d /boot/EFI/refind ]; then
+          message "Detected rEFInd bootloader"
+          message "Manual configuration needed:"
+          message "1. Edit /boot/refind_linux.conf"
+          message "2. Add 'quiet splash' to kernel parameters"
+        elif [ -f /boot/limine.cfg ] || [ -d /boot/EFI/BOOT ] && grep -q "limine" /boot/EFI/BOOT/* 2>/dev/null; then
+          message "Detected Limine bootloader"
+          message "Manual configuration needed:"
+          message "1. Edit /boot/limine.cfg"
+          message "2. Add 'quiet splash' to KERNEL_CMDLINE"
+        else
+          message warn "Could not detect bootloader type"
+          message warn "Manually add 'quiet splash' to your bootloader configuration"
         fi
-        sudo grub-mkconfig -o /boot/grub/grub.cfg
-      elif [ -d /boot/loader/entries ] && command -v bootctl >/dev/null 2>&1; then
-        message "Detected systemd-boot bootloader"
-        message "Note: systemd-boot entries may need manual editing for quiet splash"
-        message "Edit files in /boot/loader/entries/ and add 'quiet splash' to options line"
-      elif [ -f /boot/refind_linux.conf ] || [ -d /boot/EFI/refind ]; then
-        message "Detected rEFInd bootloader"
-        message "Note: rEFInd configuration may need manual editing for quiet splash"
-        message "Edit /boot/refind_linux.conf or entries in /boot/EFI/refind/"
-      elif [ -f /boot/limine.cfg ] || [ -d /boot/EFI/BOOT ] && grep -q "limine" /boot/EFI/BOOT/* 2>/dev/null; then
-        message "Detected Limine bootloader"
-        message "Note: Limine configuration may need manual editing for quiet splash"
-        message "Edit /boot/limine.cfg and add 'quiet splash' to KERNEL_CMDLINE"
       else
-        message warn "Could not detect bootloader type"
-        message warn "You may need to manually add 'quiet splash' to your bootloader configuration"
+        message "Skipping bootloader configuration (you can configure manually later)"
       fi
       ;;
 
