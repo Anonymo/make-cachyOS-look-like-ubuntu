@@ -18,6 +18,15 @@ bash make-cachyos-look-like-ubuntu.sh
 
 **⚠️ Important:** Reboot and re-run the script after first execution.
 
+### Undoing the Transformation
+
+To revert back to original CachyOS GNOME:
+
+```bash
+# From the repository directory
+bash undo-ubuntu-transformation.sh
+```
+
 ## Key CachyOS Adaptations
 
 - ✅ **Package Manager** - Uses `pacman` instead of `apt`
@@ -117,25 +126,6 @@ The script will ask if you want to configure bootloader for quiet splash:
 
 </details>
 
-<details>
-<summary><strong>🔄 Undoing the Transformation (click to expand)</strong></summary>
-
-```bash
-# From the repository directory
-bash undo-ubuntu-transformation.sh
-```
-
-The undo script will:
-- ✅ Reset GNOME settings to CachyOS defaults
-- ✅ Disable Ubuntu-style extensions  
-- ✅ Remove theme customizations
-- ✅ Reset taskbar/dock configuration
-- ✅ Create a backup before making changes
-- ⚠️ Optionally remove Ubuntu packages
-
-**Note:** Some changes may require manual cleanup via Extension Manager.
-
-</details>
 
 ## Screenshot
 
