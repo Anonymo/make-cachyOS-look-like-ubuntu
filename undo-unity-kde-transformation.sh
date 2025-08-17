@@ -175,6 +175,10 @@ rm -f "$HOME/.gtkrc-2.0" 2>/dev/null || true
 message "🗑️  Removing Latte Dock configuration..."
 rm -rf "$HOME/.config/latte" 2>/dev/null || true
 
+# Remove KvYaru-Colors attribution file (if present)
+message "🎨 Removing KvYaru-Colors attribution file..."
+rm -f "$HOME/.config/Kvantum/KvYaru-Colors-ATTRIBUTION.txt" 2>/dev/null || true
+
 # Remove XCURSOR_SIZE from environment (if we set it)
 message "🖱️  Cleaning up cursor settings..."
 if [ -f /etc/environment ] && grep -q "XCURSOR_SIZE=24" /etc/environment; then

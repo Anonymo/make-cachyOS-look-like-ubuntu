@@ -546,8 +546,9 @@ EOF
           temp_dir="/tmp/kvyaru-colors-$$"
           mkdir -p "$temp_dir"
           
-          # Download the theme
+          # Download the theme with proper attribution tracking
           if command -v git >/dev/null 2>&1; then
+            message "Cloning KvYaru-Colors repository (GPL-3.0 licensed)..."
             git clone https://github.com/GabePoel/KvYaru-Colors.git "$temp_dir" 2>/dev/null || {
               message warn "Failed to download KvYaru-Colors theme"
               rm -rf "$temp_dir"
@@ -555,18 +556,46 @@ EOF
             }
             
             if [ -d "$temp_dir" ] && [ -f "$temp_dir/install.sh" ]; then
+              # Record the commit being used for proper attribution
+              cd "$temp_dir"
+              current_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+              current_date=$(git log -1 --format="%ci" 2>/dev/null || echo "unknown")
+              cd - >/dev/null
+              
               message "Installing KvYaru-Colors themes..."
+              message "Using commit: $current_commit (date: $current_date)"
+              message "Full attribution: Gabriel Pöl (GabePoel) - GPL-3.0 License"
+              
+              # Create attribution file in Kvantum directory
+              mkdir -p "$HOME/.config/Kvantum"
+              cat > "$HOME/.config/Kvantum/KvYaru-Colors-ATTRIBUTION.txt" << EOF
+KvYaru-Colors Theme Attribution
+===============================
+
+Theme: KvYaru-Colors
+Author: Gabriel Pöl (GabePoel)
+License: GPL-3.0
+Source: https://github.com/GabePoel/KvYaru-Colors
+Commit used: $current_commit
+Commit date: $current_date
+Installed by: make-cachyos-kde-look-like-unity.sh
+Installation date: $(date)
+
+This theme installation respects the original GPL-3.0 license.
+All credit goes to the original author Gabriel Pöl (GabePoel).
+EOF
+              
               cd "$temp_dir"
               chmod +x install.sh
               ./install.sh 2>/dev/null || {
                 message warn "Automatic installation failed, trying manual install..."
-                mkdir -p "$HOME/.config/Kvantum"
                 cp -r src/* "$HOME/.config/Kvantum/" 2>/dev/null || message warn "Manual installation also failed"
               }
               cd - >/dev/null
               rm -rf "$temp_dir"
               
-              message "KvYaru-Colors themes installed!"
+              message "KvYaru-Colors themes installed with proper attribution!"
+              message "Attribution file created: ~/.config/Kvantum/KvYaru-Colors-ATTRIBUTION.txt"
               message "You can activate them via:"
               message "1. Open 'Kvantum Manager' from applications"
               message "2. Select a Yaru theme variant"

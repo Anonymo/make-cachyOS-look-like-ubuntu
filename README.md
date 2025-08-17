@@ -81,6 +81,7 @@ The script will optionally offer to install:
   - **License:** GPL-3.0  
   - **Source:** https://github.com/GabePoel/KvYaru-Colors
   - Provides native Yaru styling for KDE applications
+  - Creates attribution file with commit tracking for proper credit
   - Activated via Kvantum Manager
 
 ### KDE Configuration
