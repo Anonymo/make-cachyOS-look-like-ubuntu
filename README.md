@@ -126,6 +126,16 @@ The script will ask if you want to configure bootloader for quiet splash:
 3. Go to System Settings > Appearance > Application Style > Kvantum
 4. Restart applications
 
+### Flatpak Apps Not Themed
+**Issue:** Flatpak applications don't match the Yaru/Unity theme  
+**Solution:** The script now auto-configures Flatpak themes. If issues persist:
+```bash
+# Manually install Flatpak themes
+flatpak install flathub org.gtk.Gtk3theme.Yaru-dark
+flatpak override --user --env=GTK_THEME=Yaru-dark
+```
+**Note:** Flatpak apps cannot use global menu due to sandboxing
+
 </details>
 
 

@@ -622,6 +622,42 @@ EOF
         message "Original: https://github.com/GabePoel/KvYaru-Colors"
       fi
       
+      # Configure Flatpak theme support if Flatpak is installed
+      message ""
+      message "Checking for Flatpak support..."
+      if command -v flatpak >/dev/null 2>&1; then
+        message "Flatpak detected - configuring theme support"
+        
+        # Install Yaru themes for Flatpak
+        message "Installing Yaru themes for Flatpak applications..."
+        flatpak install -y flathub org.gtk.Gtk3theme.Yaru 2>/dev/null || message warn "Yaru GTK3 theme may already be installed"
+        flatpak install -y flathub org.gtk.Gtk3theme.Yaru-dark 2>/dev/null || message warn "Yaru-dark GTK3 theme may already be installed"
+        
+        # Set default theme for all Flatpak apps
+        message "Setting Yaru-dark as default theme for Flatpak apps..."
+        flatpak override --user --env=GTK_THEME=Yaru-dark
+        flatpak override --user --env=ICON_THEME=Yaru
+        
+        # Enable filesystem access for themes and fonts
+        message "Enabling theme and font access for Flatpak apps..."
+        flatpak override --user --filesystem=~/.themes:ro
+        flatpak override --user --filesystem=~/.icons:ro
+        flatpak override --user --filesystem=~/.fonts:ro
+        flatpak override --user --filesystem=/usr/share/themes:ro
+        flatpak override --user --filesystem=/usr/share/icons:ro
+        flatpak override --user --filesystem=/usr/share/fonts:ro
+        
+        # Qt theme support for KDE
+        flatpak override --user --env=QT_STYLE_OVERRIDE=kvantum
+        flatpak override --user --filesystem=~/.config/Kvantum:ro
+        
+        message "✅ Flatpak theme support configured!"
+        message "Note: Flatpak apps will use Yaru themes but won't support global menu"
+      else
+        message "Flatpak not detected - skipping Flatpak theme configuration"
+        message "To enable later, install Flatpak and re-run this script"
+      fi
+      
       message ""
       message "KDE Unity-like configuration complete!"
       message "HUD search: Alt+Space"
