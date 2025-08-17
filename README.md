@@ -126,6 +126,36 @@ The script will ask if you want to configure bootloader for quiet splash:
 **Solution:** Use Extension Manager GUI to enable manually  
 **Alternative:** `sudo pacman -S gnome-shell-extensions`
 
+
+</details>
+
+<details>
+<summary><strong>🛡️ Dependency Management (click to expand)</strong></summary>
+
+To ensure reliability and avoid issues with external repositories going offline, this project uses comprehensive dependency management:
+
+### AUR Package Backups
+- All AUR packages are backed up in `aur-backups/` directory
+- PKGBUILDs stored locally for offline building if AUR is unavailable
+- Backup script: `backup-aur-packages.sh` (run periodically to update)
+- Covers all project dependencies: themes, fonts, extensions, wallpapers
+- Manual installation possible via `makepkg -si` from backup directories
+
+### Backup Coverage
+- **Themes:** Yaru GTK, icon, sound, and GNOME Shell themes
+- **Fonts:** Microsoft core fonts and Ubuntu wallpapers
+- **Extensions:** Dash to Dock, Unite Shell, GNOME HUD
+- **Integration:** Global menu support libraries (libdbusmenu-*)
+- **Office:** LibreOffice Yaru styling
+
+### Usage During AUR Outages
+If AUR is unavailable or packages are removed:
+1. Navigate to `aur-backups/<package-name>/`
+2. Run `makepkg -si` to build and install from backup
+3. All PKGBUILDs maintain original attribution and licensing
+
+This backup system ensures the Ubuntu transformation remains functional even when external dependencies become unavailable.
+
 </details>
 
 

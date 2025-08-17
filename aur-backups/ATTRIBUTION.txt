@@ -1,0 +1,15 @@
+AUR Package Attribution
+======================
+
+All PKGBUILDs in this directory are downloaded from the Arch User Repository (AUR).
+Original maintainers and contributors deserve full credit for their work.
+
+Source: https://aur.archlinux.org/
+License: Individual packages are subject to their respective licenses
+
+This backup is created for contingency purposes to ensure project continuity
+and does not claim ownership of any PKGBUILD content.
+
+Backup Date: $(date)
+Project: make-cachyOS-look-like-ubuntu
+Repository: https://github.com/Anonymo/make-cachyOS-look-like-ubuntu
