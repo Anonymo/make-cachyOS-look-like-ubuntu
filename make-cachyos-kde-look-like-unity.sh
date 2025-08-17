@@ -151,13 +151,18 @@ function retry_command() {
     done
 }
 
-# Enhanced package installation with retry
+# Enhanced package installation with retry and progress tracking
 function install_packages_retry() {
     local package_manager="$1"
     shift
     local packages=("$@")
+    local package_count=${#packages[@]}
     
-    message "Installing packages with retry mechanism: ${packages[*]}"
+    if [ $package_count -eq 1 ]; then
+        message "📦 Installing package: ${packages[*]}"
+    else
+        message "📦 Installing $package_count packages: ${packages[*]}"
+    fi
     
     case "$package_manager" in
         "pacman")
@@ -174,6 +179,75 @@ function install_packages_retry() {
             return 1
             ;;
     esac
+    
+    if [ $? -eq 0 ]; then
+        if [ $package_count -eq 1 ]; then
+            message info "✅ Package installed successfully"
+        else
+            message info "✅ All $package_count packages installed successfully"
+        fi
+    fi
+}
+
+# Configuration validation after installation
+function validate_configuration() {
+    local validation_errors=0
+    
+    message "🔍 Validating transformation configuration..."
+    
+    # Check if Latte Dock is installed and configured
+    if command -v latte-dock >/dev/null 2>&1; then
+        message info "✅ Latte Dock is installed"
+        
+        # Check if Unity layout exists
+        if [ -f "$HOME/.local/share/latte/Unity.layout.latte" ]; then
+            message info "✅ Unity layout configured"
+        else
+            message warn "⚠️ Unity layout not found"
+        fi
+    else
+        message warn "⚠️ Latte Dock not installed"
+        ((validation_errors++))
+    fi
+    
+    # Check panel configuration
+    local panel_height=$(kreadconfig6 --file plasmarc --group Theme --key height 2>/dev/null || echo "")
+    if [[ "$panel_height" == "24" ]]; then
+        message info "✅ Panel height configured (24px)"
+    else
+        message warn "⚠️ Panel height may not be configured correctly"
+    fi
+    
+    # Check if global menu is configured
+    if kreadconfig6 --file plasmarc --group ModuleManager --key Modules | grep -q "appmenu" 2>/dev/null; then
+        message info "✅ Global menu module enabled"
+    else
+        message warn "⚠️ Global menu may not be configured"
+    fi
+    
+    # Check theme configuration
+    local gtk_theme=$(kreadconfig6 --file kdeglobals --group General --key Name 2>/dev/null || echo "")
+    if [[ "$gtk_theme" == *"Yaru"* ]]; then
+        message info "✅ Yaru theme applied"
+    else
+        message warn "⚠️ Yaru theme may not be applied"
+    fi
+    
+    # Check if KvYaru-Colors is available
+    if [ -d "$HOME/.local/share/themes/KvYaru"* ] 2>/dev/null || [ -d "/usr/share/themes/KvYaru"* ] 2>/dev/null; then
+        message info "✅ KvYaru-Colors themes available"
+    else
+        message warn "⚠️ KvYaru-Colors themes not found"
+    fi
+    
+    if [ $validation_errors -eq 0 ]; then
+        message info "✅ Configuration validation completed - transformation looks good!"
+    else
+        message warn "⚠️ Configuration validation found $validation_errors potential issues"
+        message warn "Run the script again or check troubleshooting section in README"
+    fi
+    
+    return $validation_errors
 }
 
 # Pre-flight validation checks
@@ -363,9 +437,14 @@ fi
 
 
 # iterate through $packages
+categories_array=($package_categories)
+total_categories=${#categories_array[@]}
+current_category=0
+
 for category in $package_categories
 do
-  message "Packages category: ${YELLOW}${category}${ENDCOLOR}"
+  ((current_category++))
+  message "📋 Processing category [$current_category/$total_categories]: ${YELLOW}${category}${ENDCOLOR}"
   message "Packages contained: "
   message "${GREEN}${packages[$category]}${ENDCOLOR}"
   
@@ -813,6 +892,10 @@ EOF
   esac
   
 done
+
+# Validate the final configuration
+message ""
+validate_configuration
 
 message "${GREEN}DONE!!${ENDCOLOR}"
 message warn "${RED}IMPORTANT!! ${YELLOW}Rerun this script again after a reboot, if this is the first run of it!${ENDCOLOR}"
