@@ -55,6 +55,8 @@ bash undo-ubuntu-transformation.sh
 - `gnome-hud` - Unity-like HUD menu for quick application menu access
 - `appmenu-gtk-module-git` - Global menu support for GTK applications
 - `gnome-shell-extension-unite` - Unity-like GNOME Shell interface with global menu integration
+- `ubuntu-wallpapers` - Authentic Ubuntu wallpaper collection
+- `libreoffice-style-yaru-fullcolor` - Yaru-styled LibreOffice icons
 
 ### GNOME Extensions
 
