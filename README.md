@@ -114,6 +114,20 @@ Or use the Extension Manager GUI for easier management.
 - **Issue:** "not in sudo group" error
 - **Solution:** Add user to wheel group: `su -c "usermod -aG wheel $USER"`
 
+### GNOME HUD Not Working
+- **Issue:** Ctrl+Alt+Space doesn't open HUD menu
+- **Solutions:**
+  1. Check if gnome-hud installed: `which gnomehud`
+  2. Install manually if needed: `pip install --user gnome-hud`
+  3. Start the service: `gnomehud-service &`
+  4. Check keybinding is set: `gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ binding`
+  5. Restart GNOME Shell: `Alt+F2`, type `r`, press Enter
+
+### Extensions Not Enabling
+- **Issue:** Unite or other extensions not enabled automatically
+- **Solution:** Use Extension Manager GUI to enable manually
+- **Alternative:** Install gnome-extensions-app: `sudo pacman -S gnome-shell-extensions`
+
 ## Undoing the Transformation
 
 If you want to revert back to the original CachyOS GNOME appearance:

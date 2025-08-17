@@ -257,15 +257,23 @@ do
     then
       message "using yay for AUR packages"
       if ! yay -S --needed --noconfirm $aur_packages; then
-        message error "Failed to install AUR packages with yay: $aur_packages"
-        error
+        message warn "Some AUR packages failed to install"
+        # Try to install gnome-hud via pip as fallback
+        if ! command -v gnomehud >/dev/null 2>&1 && ! [ -f "$HOME/.local/bin/gnomehud" ]; then
+          message "installing gnome-hud via pip as fallback"
+          pip install --user gnome-hud 2>/dev/null || message warn "Could not install gnome-hud via pip"
+        fi
       fi
     elif command -v paru &> /dev/null
     then
       message "using paru for AUR packages"
       if ! paru -S --needed --noconfirm $aur_packages; then
-        message error "Failed to install AUR packages with paru: $aur_packages"
-        error
+        message warn "Some AUR packages failed to install"
+        # Try to install gnome-hud via pip as fallback
+        if ! command -v gnomehud >/dev/null 2>&1 && ! [ -f "$HOME/.local/bin/gnomehud" ]; then
+          message "installing gnome-hud via pip as fallback"
+          pip install --user gnome-hud 2>/dev/null || message warn "Could not install gnome-hud via pip"
+        fi
       fi
     else
       message error "No AUR helper found. Please install yay or paru first to install AUR packages."
@@ -464,6 +472,71 @@ EOF
       message "replace yelp with settings in dock"
       gsettings get org.gnome.shell favorite-apps | grep "org.gnome.Settings.desktop" > /dev/null ||
       gsettings set org.gnome.shell favorite-apps "$(gsettings get  org.gnome.shell favorite-apps  | sed 's/yelp\.desktop/org\.gnome\.Settings\.desktop/')"
+      
+      # Configure gnome-hud keybinding and service
+      message "configuring GNOME HUD (Unity-like menu search)"
+      
+      # Check if gnome-hud is installed via pip or system
+      if command -v gnomehud >/dev/null 2>&1 || [ -f "$HOME/.local/bin/gnomehud" ]; then
+        message "setting up GNOME HUD keybinding (Ctrl+Alt+Space)"
+        
+        # Set up custom keybinding for HUD
+        custom_bindings=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo "[]")
+        if ! echo "$custom_bindings" | grep -q "gnome-hud"; then
+          # Add new custom keybinding
+          gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/']"
+          gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ name 'GNOME HUD'
+          
+          # Try to find gnomehud command in different locations
+          if [ -f "$HOME/.local/bin/gnomehud" ]; then
+            gnomehud_cmd="$HOME/.local/bin/gnomehud"
+          else
+            gnomehud_cmd="gnomehud"
+          fi
+          
+          # Use rofi if available for better HUD experience
+          if command -v rofi >/dev/null 2>&1; then
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ command "${gnomehud_cmd}-rofi"
+          else
+            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ command "$gnomehud_cmd"
+          fi
+          
+          gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ binding '<Primary><Alt>space'
+        fi
+        
+        # Create autostart entry for HUD service
+        message "setting up GNOME HUD service autostart"
+        mkdir -p "$HOME/.config/autostart"
+        
+        # Find the correct service command
+        if [ -f "$HOME/.local/bin/gnomehud-service" ]; then
+          service_cmd="$HOME/.local/bin/gnomehud-service"
+        else
+          service_cmd="gnomehud-service"
+        fi
+        
+        cat > "$HOME/.config/autostart/gnome-hud.desktop" << EOF
+[Desktop Entry]
+Type=Application
+Name=GNOME HUD Service
+Comment=Unity-like HUD menu service
+Exec=$service_cmd
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+StartupNotify=false
+EOF
+        
+        # Try to start the service now
+        if command -v gnomehud-service >/dev/null 2>&1 || [ -f "$HOME/.local/bin/gnomehud-service" ]; then
+          message "starting GNOME HUD service"
+          nohup $service_cmd >/dev/null 2>&1 &
+        fi
+        
+        message "GNOME HUD configured - use Ctrl+Alt+Space to open menu search"
+      else
+        message warn "GNOME HUD not found - it may need to be installed manually with: pip install --user gnome-hud"
+      fi
       ;;
   esac
   
