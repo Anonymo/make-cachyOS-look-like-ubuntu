@@ -18,6 +18,15 @@ bash make-cachyos-kde-look-like-unity.sh
 
 **⚠️ Important:** Reboot and re-run the script after first execution.
 
+### Undoing the Transformation
+
+To revert back to original CachyOS KDE:
+
+```bash
+# From the repository directory
+bash undo-unity-kde-transformation.sh
+```
+
 ## Why KDE > GNOME for Unity
 
 - ✅ **Native Global Menu** - No extensions needed
@@ -117,23 +126,6 @@ The script will ask if you want to configure bootloader for quiet splash:
 
 </details>
 
-<details>
-<summary><strong>🔄 Undoing the Transformation (click to expand)</strong></summary>
-
-```bash
-# From the repository directory
-bash undo-unity-kde-transformation.sh
-```
-
-The undo script will:
-- ✅ Reset KDE Plasma settings to CachyOS defaults
-- ✅ Remove Unity-style layout and Latte Dock
-- ✅ Restore window buttons to right side
-- ✅ Disable global menu and reset keyboard shortcuts
-- ✅ Create backup before making changes
-- ⚠️ Optionally remove Ubuntu packages
-
-</details>
 
 <details>
 <summary><strong>🛡️ Dependency Management (click to expand)</strong></summary>
