@@ -69,6 +69,7 @@ When the script runs the first time, it is normal that the terminal font looks d
 - `gnome-shell-extension-dash-to-dock` - Dash to Dock extension
 - `gnome-hud` - Unity-like HUD menu for quick application menu access
 - `appmenu-gtk-module-git` - Global menu support for GTK applications
+- `gnome-shell-extension-unite` - Unity-like GNOME Shell interface with global menu integration
 
 ### GNOME Extensions
 
@@ -79,6 +80,7 @@ The script automatically installs and enables these GNOME extensions:
 - **Dash to Dock** (`gnome-shell-extension-dash-to-dock`) - Ubuntu-style dock
 - **Desktop Icons NG** (`gnome-shell-extension-desktop-icons-ng`) - Desktop icons
 - **User Themes** (from `gnome-shell-extensions`) - Custom shell themes
+- **Unite Shell** (`gnome-shell-extension-unite`) - Unity-like interface with global menu support
 
 #### Manual Installation Required
 
@@ -133,13 +135,19 @@ The undo script will:
 
 ## Unity-like Features
 
-The script now includes **gnome-hud**, which brings back Unity's signature HUD (Heads-Up Display) functionality:
+The script now includes a complete Unity-like experience with these key components:
 
+### HUD (Heads-Up Display)
 - **Quick Menu Access**: Press `Ctrl + Alt + Space` to open the HUD
-- **Search Application Menus**: Type to quickly find any menu item in the current application
+- **Search Application Menus**: Type to quickly find any menu item in the current application  
 - **Keyboard-Driven Navigation**: Access any application function without clicking through menus
-- **Authentic Ubuntu Experience**: Restores one of Unity's most beloved features
 
-This makes the desktop feel even more like classic Ubuntu with Unity!
+### Global Menu & Unity Interface
+- **Unite Shell Extension**: Transforms GNOME Shell to look like Unity's interface
+- **Window Title Integration**: Shows current window title in the panel for maximized windows
+- **Global Menu Support**: Application menus appear in the top panel (Unity-style)
+- **Clean Window Decorations**: Removes window borders for maximized apps
+
+This complete package recreates the authentic Ubuntu Unity desktop experience!
 
 ![Ubuntuish CachyOS GNOME Desktop](screenshot/screenshot1.png "Ubuntuish CachyOS GNOME Desktop")
