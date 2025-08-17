@@ -1,56 +1,33 @@
 # make-cachyos-look-like-ubuntu
 
-**Adapted for CachyOS from:** https://git.la10cy.net/DeltaLima/make-debian-look-like-ubuntu  
-**Original Author:** DeltaLima  
-**Adapted by:** Anonymo
+**GNOME Branch - Ubuntu Desktop for CachyOS GNOME**  
+**Original Author:** DeltaLima | **Adapted for CachyOS by:** Anonymo
 
-This script performs all necessary steps to make a CachyOS GNOME desktop look like an Ubuntu desktop.
+Transform your CachyOS GNOME desktop into Ubuntu with Unity-like HUD, global menu, and authentic theming.
 
-## Key Changes for CachyOS
+## Quick Start
 
-- ✅ **Package Manager**: Replaced `apt` with `pacman` 
-- ✅ **AUR Support**: Added support for both `yay` and `paru` AUR helpers
-- ✅ **Package Names**: Updated to CachyOS/Arch Linux equivalents
-- ✅ **Yaru Theme**: Installs Ubuntu's Yaru theme from AUR
-- ✅ **No Firefox Flatpak**: Removed Firefox flatpak installation (uses system Firefox)
-- ✅ **No Flatpak Dependencies**: Removed unnecessary flatpak/flathub setup
-- ✅ **Repository Config**: Uses pacman.conf instead of sources.list
+**Prerequisites:** CachyOS with GNOME, `wheel` group membership, AUR helper (`yay`/`paru`)
 
-## Prerequisites
-
-- CachyOS with GNOME desktop environment
-- User must be in the `wheel` group (for sudo access)
-- An AUR helper installed (`yay` or `paru`)
-
-## Installation
-
-### Step 1: Install prerequisites (if needed)
 ```bash
-# Install git (if not already installed)
-sudo pacman -S git
-
-# Install an AUR helper (if you don't have yay or paru)
-sudo pacman -S --needed base-devel
-git clone https://aur.archlinux.org/yay.git
-cd yay
-makepkg -si
-cd ..
-```
-
-### Step 2: Clone and run
-```bash
-# Clone the repository
+# Clone and run
 git clone https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
 cd make-cachyOS-look-like-ubuntu
-
-# Run the transformation script
 bash make-cachyos-look-like-ubuntu.sh
 ```
 
-**Important!** After the first run, you have to **reboot and re-run** the script. 
-When the script runs the first time, it is normal that the terminal font looks different after it. This normalizes after a reboot.
+**⚠️ Important:** Reboot and re-run the script after first execution.
 
-## What it installs
+## Key CachyOS Adaptations
+
+- ✅ **Package Manager** - Uses `pacman` instead of `apt`
+- ✅ **AUR Support** - Supports both `yay` and `paru` helpers
+- ✅ **Native Packages** - CachyOS/Arch Linux package names
+- ✅ **Yaru Theme** - Ubuntu's Yaru theme from AUR
+- ✅ **No Flatpak Dependencies** - Uses system packages
+
+<details>
+<summary><strong>📦 What Gets Installed</strong></summary>
 
 ### Official Repository Packages
 - Ubuntu fonts, Liberation fonts, Noto fonts
@@ -72,67 +49,76 @@ When the script runs the first time, it is normal that the terminal font looks d
 
 ### GNOME Extensions
 
-The script automatically installs and enables these GNOME extensions:
-
 #### Automatically Installed & Enabled
-- **AppIndicator Support** (`gnome-shell-extension-appindicator`) - System tray support
-- **Dash to Dock** (`gnome-shell-extension-dash-to-dock`) - Ubuntu-style dock
-- **Desktop Icons NG** (`gnome-shell-extension-desktop-icons-ng`) - Desktop icons
-- **User Themes** (from `gnome-shell-extensions`) - Custom shell themes
-- **Unite Shell** (`gnome-shell-extension-unite`) - Unity-like interface with global menu support
+- **AppIndicator Support** - System tray support
+- **Dash to Dock** - Ubuntu-style dock
+- **Desktop Icons NG** - Desktop icons
+- **User Themes** - Custom shell themes
+- **Unite Shell** - Unity-like interface with global menu support
 
-#### Manual Installation Required
+#### Manual Installation (if needed)
+Some extensions may need manual installation via Extension Manager:
+1. **Open Extension Manager** (installed by script)
+2. **Search and install** any missing extensions
+3. **Enable manually** using `gnome-extensions enable <extension-id>`
 
-Some extensions may need to be installed manually via Extension Manager:
+</details>
 
-1. **Open Extension Manager** (installed by the script)
-2. **Search for and install:**
-   - Any additional extensions that failed to auto-enable
-   - Custom extensions for specific Ubuntu features
+<details>
+<summary><strong>🎯 Unity-like Features</strong></summary>
 
-**Tip:** If any extensions show as "not enabled" after running the script, you can manually enable them using:
-```bash
-gnome-extensions enable <extension-id>
-```
+### HUD (Heads-Up Display)
+- **Quick Menu Access**: Press `Ctrl + Alt + Space` to open the HUD
+- **Search Application Menus**: Type to quickly find any menu item in the current application  
+- **Keyboard-Driven Navigation**: Access any application function without clicking through menus
 
-Or use the Extension Manager GUI for easier management.
+### Global Menu & Unity Interface
+- **Unite Shell Extension**: Transforms GNOME Shell to look like Unity's interface
+- **Window Title Integration**: Shows current window title in the panel for maximized windows
+- **Global Menu Support**: Application menus appear in the top panel (Unity-style)
+- **Clean Window Decorations**: Removes window borders for maximized apps
 
-## Troubleshooting
+This complete package recreates the authentic Ubuntu Unity desktop experience!
+
+</details>
+
+<details>
+<summary><strong>🔧 Troubleshooting</strong></summary>
 
 ### Shell Compatibility
-- **Issue:** Script exits immediately or shows "Installation aborted"
-- **Cause:** CachyOS uses fish/zsh by default, script requires bash
-- **Solution:** The script automatically detects and restarts with bash
+**Issue:** Script exits immediately or shows "Installation aborted"  
+**Cause:** CachyOS uses fish/zsh by default, script requires bash  
+**Solution:** The script automatically detects and restarts with bash
 
 ### Bootloader Support (Optional)
 The script will ask if you want to configure bootloader for quiet splash:
-- **GRUB:** Automatically configured if you choose yes
-- **systemd-boot:** Manual instructions provided for editing /boot/loader/entries/
-- **rEFInd:** Manual instructions provided for editing /boot/refind_linux.conf
-- **Limine:** Manual instructions provided for editing /boot/limine.cfg
-- **Other/Unknown:** Skip configuration or manually add 'quiet splash' to kernel parameters
+- **GRUB:** Automatically configured
+- **systemd-boot:** Manual instructions for `/boot/loader/entries/`
+- **rEFInd:** Manual instructions for `/boot/refind_linux.conf`
+- **Limine:** Manual instructions for `/boot/limine.cfg`
 
 ### Group Membership
-- **Issue:** "not in sudo group" error
-- **Solution:** Add user to wheel group: `su -c "usermod -aG wheel $USER"`
+**Issue:** "not in sudo group" error  
+**Solution:** `su -c "usermod -aG wheel $USER"`
 
 ### GNOME HUD Not Working
-- **Issue:** Ctrl+Alt+Space doesn't open HUD menu
-- **Solutions:**
-  1. Check if gnome-hud installed: `which gnomehud`
-  2. Install manually if needed: `pip install --user gnome-hud`
-  3. Start the service: `gnomehud-service &`
-  4. Check keybinding is set: `gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ binding`
-  5. Restart GNOME Shell: `Alt+F2`, type `r`, press Enter
+**Issue:** Ctrl+Alt+Space doesn't open HUD menu  
+**Solutions:**
+1. Check if gnome-hud installed: `which gnomehud`
+2. Install manually if needed: `pip install --user gnome-hud`
+3. Start the service: `gnomehud-service &`
+4. Check keybinding: `gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ binding`
+5. Restart GNOME Shell: `Alt+F2`, type `r`, press Enter
 
 ### Extensions Not Enabling
-- **Issue:** Unite or other extensions not enabled automatically
-- **Solution:** Use Extension Manager GUI to enable manually
-- **Alternative:** Install gnome-extensions-app: `sudo pacman -S gnome-shell-extensions`
+**Issue:** Unite or other extensions not enabled automatically  
+**Solution:** Use Extension Manager GUI to enable manually  
+**Alternative:** `sudo pacman -S gnome-shell-extensions`
 
-## Undoing the Transformation
+</details>
 
-If you want to revert back to the original CachyOS GNOME appearance:
+<details>
+<summary><strong>🔄 Undoing the Transformation</strong></summary>
 
 ```bash
 # From the repository directory
@@ -149,21 +135,8 @@ The undo script will:
 
 **Note:** Some changes may require manual cleanup via Extension Manager.
 
-## Unity-like Features
+</details>
 
-The script now includes a complete Unity-like experience with these key components:
-
-### HUD (Heads-Up Display)
-- **Quick Menu Access**: Press `Ctrl + Alt + Space` to open the HUD
-- **Search Application Menus**: Type to quickly find any menu item in the current application  
-- **Keyboard-Driven Navigation**: Access any application function without clicking through menus
-
-### Global Menu & Unity Interface
-- **Unite Shell Extension**: Transforms GNOME Shell to look like Unity's interface
-- **Window Title Integration**: Shows current window title in the panel for maximized windows
-- **Global Menu Support**: Application menus appear in the top panel (Unity-style)
-- **Clean Window Decorations**: Removes window borders for maximized apps
-
-This complete package recreates the authentic Ubuntu Unity desktop experience!
+## Screenshot
 
 ![Ubuntuish CachyOS GNOME Desktop](screenshot/screenshot1.png "Ubuntuish CachyOS GNOME Desktop")
