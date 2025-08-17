@@ -125,9 +125,152 @@ confirm_continue()
 
 ###
 
+# Retry mechanism for network operations
+function retry_command() {
+    local max_attempts=3
+    local delay=2
+    local attempt=1
+    local command=("$@")
+    
+    while [ $attempt -le $max_attempts ]; do
+        message info "Attempt $attempt/$max_attempts: ${command[*]}"
+        
+        if "${command[@]}"; then
+            return 0
+        else
+            if [ $attempt -lt $max_attempts ]; then
+                message warn "Attempt $attempt failed, retrying in ${delay}s..."
+                sleep $delay
+                delay=$((delay * 2))  # Exponential backoff
+            else
+                message error "All $max_attempts attempts failed for: ${command[*]}"
+                return 1
+            fi
+        fi
+        ((attempt++))
+    done
+}
+
+# Enhanced package installation with retry
+function install_packages_retry() {
+    local package_manager="$1"
+    shift
+    local packages=("$@")
+    
+    message "Installing packages with retry mechanism: ${packages[*]}"
+    
+    case "$package_manager" in
+        "pacman")
+            retry_command sudo pacman -S --needed --noconfirm "${packages[@]}"
+            ;;
+        "yay")
+            retry_command yay -S --needed --noconfirm "${packages[@]}"
+            ;;
+        "paru")
+            retry_command paru -S --needed --noconfirm "${packages[@]}"
+            ;;
+        *)
+            message error "Unknown package manager: $package_manager"
+            return 1
+            ;;
+    esac
+}
+
+# Pre-flight validation checks
+function validate_system() {
+    local validation_errors=0
+    
+    message "🔍 Running pre-flight validation checks..."
+    
+    # Check if running as root
+    if [ "$(whoami)" == "root" ]; then
+        message error "Cannot run as root user"
+        return 1
+    fi
+    
+    # Check desktop environment
+    if [ -z "$XDG_CURRENT_DESKTOP" ]; then
+        message warn "Could not detect desktop environment"
+    elif [[ "$XDG_CURRENT_DESKTOP" != *"KDE"* ]] && [[ "$XDG_CURRENT_DESKTOP" != *"plasma"* ]]; then
+        message warn "This script is designed for KDE Plasma. Current DE: $XDG_CURRENT_DESKTOP"
+        message warn "Some features may not work correctly"
+    else
+        message info "✅ KDE Plasma desktop environment detected"
+    fi
+    
+    # Check KDE version (Plasma 6 recommended)
+    if command -v plasmashell >/dev/null 2>&1; then
+        local plasma_version=$(plasmashell --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
+        if [[ "$plasma_version" =~ ^6\. ]]; then
+            message info "✅ KDE Plasma 6 detected (version $plasma_version)"
+        elif [[ "$plasma_version" =~ ^5\. ]]; then
+            message warn "⚠️ KDE Plasma 5 detected - some features optimized for Plasma 6"
+        else
+            message warn "⚠️ Could not determine Plasma version"
+        fi
+    fi
+    
+    # Check internet connectivity
+    if ping -c 1 -W 3 8.8.8.8 >/dev/null 2>&1; then
+        message info "✅ Internet connectivity verified"
+    else
+        message error "❌ No internet connection detected"
+        message error "Internet connection required for package downloads"
+        ((validation_errors++))
+    fi
+    
+    # Check available disk space (at least 2GB recommended)
+    local available_mb=$(df -BM "$HOME" 2>/dev/null | awk 'NR==2 {print $4}' | sed 's/M//' 2>/dev/null || echo "0")
+    if [ "$available_mb" -gt 2048 ]; then
+        message info "✅ Sufficient disk space available (${available_mb}MB)"
+    else
+        message warn "⚠️ Low disk space: ${available_mb}MB available (2GB+ recommended)"
+    fi
+    
+    # Check if pacman is available
+    if command -v pacman >/dev/null 2>&1; then
+        message info "✅ Pacman package manager available"
+    else
+        message error "❌ Pacman not found - this script requires Arch-based distribution"
+        ((validation_errors++))
+    fi
+    
+    # Check for AUR helper
+    if command -v yay >/dev/null 2>&1; then
+        message info "✅ yay AUR helper detected"
+    elif command -v paru >/dev/null 2>&1; then
+        message info "✅ paru AUR helper detected"
+    else
+        message warn "⚠️ No AUR helper found (yay/paru) - some packages may need manual installation"
+    fi
+    
+    # Check for KDE-specific tools
+    if command -v kwriteconfig6 >/dev/null 2>&1; then
+        message info "✅ kwriteconfig6 available for KDE configuration"
+    elif command -v kwriteconfig5 >/dev/null 2>&1; then
+        message info "✅ kwriteconfig5 available for KDE configuration"
+    else
+        message warn "⚠️ KDE configuration tools not found"
+    fi
+    
+    if [ $validation_errors -gt 0 ]; then
+        message error "Pre-flight validation failed with $validation_errors critical errors"
+        message error "Please resolve the issues above before continuing"
+        return 1
+    else
+        message info "✅ Pre-flight validation completed successfully"
+        return 0
+    fi
+}
+
 if [ "$(whoami)" == "root" ]
 then message error "I cannot run as root"
 error
+fi
+
+# Run validation checks
+if ! validate_system; then
+    exit 1
 fi
 
 if [ -z "$arguments" ]
@@ -241,8 +384,8 @@ do
   
   # package installation #
   message "installing packages"
-  if ! sudo pacman -S --needed --noconfirm ${packages[$category]}; then
-    message error "Failed to install packages: ${packages[$category]}"
+  if ! install_packages_retry "pacman" ${packages[$category]}; then
+    message error "Failed to install packages after retries: ${packages[$category]}"
     error
   fi
   
@@ -254,8 +397,8 @@ do
     if command -v yay &> /dev/null
     then
       message "using yay for AUR packages"
-      if ! yay -S --needed --noconfirm $aur_packages; then
-        message warn "Some AUR packages failed to install"
+      if ! install_packages_retry "yay" $aur_packages; then
+        message warn "Some AUR packages failed to install after retries"
         # Try to install gnome-hud via pip as fallback
         if ! command -v gnomehud >/dev/null 2>&1 && ! [ -f "$HOME/.local/bin/gnomehud" ]; then
           message "installing gnome-hud via pip as fallback"
@@ -265,8 +408,8 @@ do
     elif command -v paru &> /dev/null
     then
       message "using paru for AUR packages"
-      if ! paru -S --needed --noconfirm $aur_packages; then
-        message warn "Some AUR packages failed to install"
+      if ! install_packages_retry "paru" $aur_packages; then
+        message warn "Some AUR packages failed to install after retries"
         # Try to install gnome-hud via pip as fallback
         if ! command -v gnomehud >/dev/null 2>&1 && ! [ -f "$HOME/.local/bin/gnomehud" ]; then
           message "installing gnome-hud via pip as fallback"
