@@ -16,10 +16,11 @@ KDE Plasma provides superior Unity emulation compared to GNOME because:
 - ✅ **Window Button Integration** - Native support for left-side buttons
 - ✅ **Better Performance** - More efficient than GNOME with extensions
 - ✅ **HUD via KRunner** - Native Alt+Space search functionality
+- ✅ **Plasma 6 Optimized** - Built for CachyOS Plasma 6.4.4
 
 ## Prerequisites
 
-- CachyOS with KDE Plasma desktop environment
+- CachyOS with KDE Plasma 6 desktop environment
 - User must be in the `wheel` group (for sudo access)
 - An AUR helper installed (`yay` or `paru`)
 
@@ -76,7 +77,9 @@ When the script runs the first time, it is normal that the terminal font looks d
 The script will optionally offer to install:
 - `kvantum` - Advanced theming engine for KDE
 - **KvYaru-Colors** - Yaru-style themes specifically designed for KDE/Plasma
-  - Downloaded from: https://github.com/GabePoel/KvYaru-Colors
+  - **Author:** Gabriel Pöl (GabePoel)  
+  - **License:** GPL-3.0  
+  - **Source:** https://github.com/GabePoel/KvYaru-Colors
   - Provides native Yaru styling for KDE applications
   - Activated via Kvantum Manager
 

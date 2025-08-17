@@ -358,22 +358,31 @@ do
       mkdir -p $HOME/.config/latte
       
       message "Configure window decorations - buttons on left"
+      # CachyOS uses Plasma 6 - use kwriteconfig6
+      if command -v kwriteconfig6 >/dev/null 2>&1; then
+        KWRITECONFIG="kwriteconfig6"
+        message "Using kwriteconfig6 for Plasma 6 configuration"
+      else
+        message error "kwriteconfig6 not found - Plasma 6 is required for CachyOS"
+        error
+      fi
+      
       # Set window buttons to left side (Unity style)
-      kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft "XSM"
-      kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnRight ""
-      kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key BorderSize "Normal"
-      kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ShowToolTips "false"
+      $KWRITECONFIG --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft "XSM"
+      $KWRITECONFIG --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnRight ""
+      $KWRITECONFIG --file kwinrc --group org.kde.kdecoration2 --key BorderSize "Normal"
+      $KWRITECONFIG --file kwinrc --group org.kde.kdecoration2 --key ShowToolTips "false"
       
       message "Configure KDE panels - Unity-style layout"
       
       # Configure top panel (24px height for Unity-style)
       message "Setting up top panel with global menu"
-      kwriteconfig5 --file plasmashellrc --group PlasmaViews --group Panel 0 --group Defaults --key thickness 24
+      $KWRITECONFIG --file plasmashellrc --group PlasmaViews --group Panel 0 --group Defaults --key thickness 24
       
       # Configure global menu and appmenu settings
       message "Enable global menu support"
-      kwriteconfig5 --file kdeglobals --group KDE --key ShowMenuBar true
-      kwriteconfig5 --file kwinrc --group Windows --key BorderlessMaximizedWindows true
+      $KWRITECONFIG --file kdeglobals --group KDE --key ShowMenuBar true
+      $KWRITECONFIG --file kwinrc --group Windows --key BorderlessMaximizedWindows true
       
       # Set environment variables for GTK global menu
       cat > $HOME/.config/plasma-workspace/env/gtk-appmenu.sh << 'EOF'
@@ -420,20 +429,20 @@ EOF
       
       message "Configure KDE appearance settings"
       # Set fonts to Ubuntu
-      kwriteconfig5 --file kdeglobals --group General --key font "Ubuntu,11,-1,5,50,0,0,0,0,0"
-      kwriteconfig5 --file kdeglobals --group General --key fixed "Ubuntu Mono,13,-1,5,50,0,0,0,0,0"
-      kwriteconfig5 --file kdeglobals --group General --key smallestReadableFont "Ubuntu,9,-1,5,50,0,0,0,0,0"
-      kwriteconfig5 --file kdeglobals --group General --key toolBarFont "Ubuntu,10,-1,5,50,0,0,0,0,0"
-      kwriteconfig5 --file kdeglobals --group WM --key activeFont "Ubuntu,11,-1,5,75,0,0,0,0,0"
+      $KWRITECONFIG --file kdeglobals --group General --key font "Ubuntu,11,-1,5,50,0,0,0,0,0"
+      $KWRITECONFIG --file kdeglobals --group General --key fixed "Ubuntu Mono,13,-1,5,50,0,0,0,0,0"
+      $KWRITECONFIG --file kdeglobals --group General --key smallestReadableFont "Ubuntu,9,-1,5,50,0,0,0,0,0"
+      $KWRITECONFIG --file kdeglobals --group General --key toolBarFont "Ubuntu,10,-1,5,50,0,0,0,0,0"
+      $KWRITECONFIG --file kdeglobals --group WM --key activeFont "Ubuntu,11,-1,5,75,0,0,0,0,0"
       
       # Set theme settings
-      kwriteconfig5 --file kdeglobals --group General --key ColorScheme "Breeze Dark"
-      kwriteconfig5 --file kdeglobals --group General --key Name "Breeze Dark"
-      kwriteconfig5 --file kdeglobals --group Icons --key Theme "Yaru-dark"
-      kwriteconfig5 --file kdeglobals --group KDE --key widgetStyle "Breeze"
+      $KWRITECONFIG --file kdeglobals --group General --key ColorScheme "Breeze Dark"
+      $KWRITECONFIG --file kdeglobals --group General --key Name "Breeze Dark"
+      $KWRITECONFIG --file kdeglobals --group Icons --key Theme "Yaru-dark"
+      $KWRITECONFIG --file kdeglobals --group KDE --key widgetStyle "Breeze"
       
       message "Configure Meta (Super) key for application menu"
-      kwriteconfig5 --file kwinrc --group ModifierOnlyShortcuts --key Meta "org.kde.plasmashell,/PlasmaShell,org.kde.PlasmaShell,activateLauncherMenu"
+      $KWRITECONFIG --file kwinrc --group ModifierOnlyShortcuts --key Meta "org.kde.plasmashell,/PlasmaShell,org.kde.PlasmaShell,activateLauncherMenu"
 
       # gtk-3.0 and gtk-4.0 settings for KDE/GTK integration
       message "setting gtk-3.0 and gtk-4.0 for KDE integration"
@@ -481,19 +490,19 @@ EOF
       message "Setting up Alt+Space for HUD-like menu search"
       
       # Configure KRunner for HUD-like behavior
-      kwriteconfig5 --file krunnerrc --group General --key ActivateWhenTypingOnDesktop false
-      kwriteconfig5 --file krunnerrc --group General --key FreeFloating true
-      kwriteconfig5 --file krunnerrc --group General --key RetainPriorSearch false
+      $KWRITECONFIG --file krunnerrc --group General --key ActivateWhenTypingOnDesktop false
+      $KWRITECONFIG --file krunnerrc --group General --key FreeFloating true
+      $KWRITECONFIG --file krunnerrc --group General --key RetainPriorSearch false
       
       # Set up global shortcut for HUD (Alt+Space like Unity)
-      kwriteconfig5 --file kglobalshortcutsrc --group krunner --key _launch "Alt+Space,Alt+Space,KRunner"
+      $KWRITECONFIG --file kglobalshortcutsrc --group krunner --key _launch "Alt+Space,Alt+Space,KRunner"
       
       # Enable useful KRunner plugins for HUD-like experience
-      kwriteconfig5 --file krunnerrc --group Plugins --key appstreamEnabled true
-      kwriteconfig5 --file krunnerrc --group Plugins --key applicationsEnabled true
-      kwriteconfig5 --file krunnerrc --group Plugins --key desktopsessionsEnabled true
-      kwriteconfig5 --file krunnerrc --group Plugins --key shellEnabled true
-      kwriteconfig5 --file krunnerrc --group Plugins --key windowsEnabled true
+      $KWRITECONFIG --file krunnerrc --group Plugins --key appstreamEnabled true
+      $KWRITECONFIG --file krunnerrc --group Plugins --key applicationsEnabled true
+      $KWRITECONFIG --file krunnerrc --group Plugins --key desktopsessionsEnabled true
+      $KWRITECONFIG --file krunnerrc --group Plugins --key shellEnabled true
+      $KWRITECONFIG --file krunnerrc --group Plugins --key windowsEnabled true
       
       # Configure Application Dashboard for Unity-like app menu
       message "Configure Application Dashboard widget"
@@ -511,7 +520,9 @@ EOF
       message ""
       message "Optional: Install KvYaru-Colors theme for native KDE Yaru styling?"
       message "This adds Kvantum theming engine and Yaru-style themes specifically for KDE"
+      message "KvYaru-Colors by GabePoel: Yaru color scheme variants for KDE/Plasma"
       message warn "This downloads themes from GitHub (https://github.com/GabePoel/KvYaru-Colors)"
+      message warn "License: GPL-3.0 - Author: Gabriel Pöl (GabePoel)"
       read -p "[y/N?] " install_kvyaru
       install_kvyaru_lower=$(echo "$install_kvyaru" | tr '[:upper:]' '[:lower:]')
       

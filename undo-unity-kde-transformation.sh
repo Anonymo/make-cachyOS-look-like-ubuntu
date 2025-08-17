@@ -124,39 +124,39 @@ if [ "$use_original_backup" = true ]; then
 else
     message "🔧 Resetting KDE settings to defaults (no original backup found)..."
 
-    # Reset window decorations
-    kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft ""
-    kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnRight "HIAX"
-    kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key BorderSize "Normal"
-    kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ShowToolTips "true"
+    # Reset window decorations (CachyOS uses Plasma 6)
+    kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft ""
+    kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnRight "HIAX"
+    kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key BorderSize "Normal"
+    kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key ShowToolTips "true"
     
     # Reset global menu settings
-    kwriteconfig5 --file kdeglobals --group KDE --key ShowMenuBar false
-    kwriteconfig5 --file kwinrc --group Windows --key BorderlessMaximizedWindows false
+    kwriteconfig6 --file kdeglobals --group KDE --key ShowMenuBar false
+    kwriteconfig6 --file kwinrc --group Windows --key BorderlessMaximizedWindows false
     
     # Reset fonts to system defaults
-    kwriteconfig5 --file kdeglobals --group General --delete font
-    kwriteconfig5 --file kdeglobals --group General --delete fixed
-    kwriteconfig5 --file kdeglobals --group General --delete smallestReadableFont
-    kwriteconfig5 --file kdeglobals --group General --delete toolBarFont
-    kwriteconfig5 --file kdeglobals --group WM --delete activeFont
+    kwriteconfig6 --file kdeglobals --group General --delete font
+    kwriteconfig6 --file kdeglobals --group General --delete fixed
+    kwriteconfig6 --file kdeglobals --group General --delete smallestReadableFont
+    kwriteconfig6 --file kdeglobals --group General --delete toolBarFont
+    kwriteconfig6 --file kdeglobals --group WM --delete activeFont
     
     # Reset theme settings
-    kwriteconfig5 --file kdeglobals --group General --key ColorScheme "Breeze"
-    kwriteconfig5 --file kdeglobals --group General --key Name "Breeze"
-    kwriteconfig5 --file kdeglobals --group Icons --key Theme "breeze"
-    kwriteconfig5 --file kdeglobals --group KDE --key widgetStyle "Breeze"
+    kwriteconfig6 --file kdeglobals --group General --key ColorScheme "Breeze"
+    kwriteconfig6 --file kdeglobals --group General --key Name "Breeze"
+    kwriteconfig6 --file kdeglobals --group Icons --key Theme "breeze"
+    kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle "Breeze"
     
     # Reset Meta key behavior
-    kwriteconfig5 --file kwinrc --group ModifierOnlyShortcuts --delete Meta
+    kwriteconfig6 --file kwinrc --group ModifierOnlyShortcuts --delete Meta
     
     # Reset KRunner settings
-    kwriteconfig5 --file krunnerrc --group General --delete ActivateWhenTypingOnDesktop
-    kwriteconfig5 --file krunnerrc --group General --delete FreeFloating
-    kwriteconfig5 --file krunnerrc --group General --delete RetainPriorSearch
+    kwriteconfig6 --file krunnerrc --group General --delete ActivateWhenTypingOnDesktop
+    kwriteconfig6 --file krunnerrc --group General --delete FreeFloating
+    kwriteconfig6 --file krunnerrc --group General --delete RetainPriorSearch
     
     # Reset KRunner shortcut to default (Alt+F2)
-    kwriteconfig5 --file kglobalshortcutsrc --group krunner --key _launch "Alt+F2,Alt+F2,KRunner"
+    kwriteconfig6 --file kglobalshortcutsrc --group krunner --key _launch "Alt+F2,Alt+F2,KRunner"
 fi
 
 # Stop and disable Latte Dock
