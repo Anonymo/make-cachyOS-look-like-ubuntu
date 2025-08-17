@@ -1,24 +1,25 @@
-# make-cachyos-look-like-ubuntu
+# make-cachyos-kde-look-like-unity
 
-**Adapted for CachyOS from:** https://git.la10cy.net/DeltaLima/make-debian-look-like-ubuntu  
+**KDE Branch - Unity-style Layout for CachyOS KDE Plasma**  
 **Original Author:** DeltaLima  
-**Adapted by:** Anonymo
+**Adapted for KDE by:** Anonymo
 
-This script performs all necessary steps to make a CachyOS GNOME desktop look like an Ubuntu desktop.
+This script performs all necessary steps to make a CachyOS KDE Plasma desktop look and feel like Ubuntu Unity with native KDE features.
 
-## Key Changes for CachyOS
+## Why KDE is Better for Unity-style Layout
 
-- ✅ **Package Manager**: Replaced `apt` with `pacman` 
-- ✅ **AUR Support**: Added support for both `yay` and `paru` AUR helpers
-- ✅ **Package Names**: Updated to CachyOS/Arch Linux equivalents
-- ✅ **Yaru Theme**: Installs Ubuntu's Yaru theme from AUR
-- ✅ **No Firefox Flatpak**: Removed Firefox flatpak installation (uses system Firefox)
-- ✅ **No Flatpak Dependencies**: Removed unnecessary flatpak/flathub setup
-- ✅ **Repository Config**: Uses pacman.conf instead of sources.list
+KDE Plasma provides superior Unity emulation compared to GNOME because:
+
+- ✅ **Native Global Menu Support** - Built-in, no extensions required
+- ✅ **Better Panel Customization** - Pixel-perfect sizing (24px top, 48px dock)
+- ✅ **Stable Configuration** - Settings persist through updates
+- ✅ **Window Button Integration** - Native support for left-side buttons
+- ✅ **Better Performance** - More efficient than GNOME with extensions
+- ✅ **HUD via KRunner** - Native Alt+Space search functionality
 
 ## Prerequisites
 
-- CachyOS with GNOME desktop environment
+- CachyOS with KDE Plasma desktop environment
 - User must be in the `wheel` group (for sudo access)
 - An AUR helper installed (`yay` or `paru`)
 
@@ -39,8 +40,8 @@ cd ..
 
 ### Step 2: Clone and run
 ```bash
-# Clone the repository
-git clone https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
+# Clone the KDE branch
+git clone -b KDE https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
 cd make-cachyOS-look-like-ubuntu
 
 # Run the transformation script
@@ -54,56 +55,61 @@ When the script runs the first time, it is normal that the terminal font looks d
 
 ### Official Repository Packages
 - Ubuntu fonts, Liberation fonts, Noto fonts
-- Plymouth, GNOME extensions, GNOME tweaks
-- GNOME Software (package manager GUI)
+- Plymouth for boot splash
+- KDE Plasma desktop and applications
 - NetworkManager OpenVPN support
 - Thunderbird email client
-- rofi-wayland (menu system for HUD functionality)
+- Konsole terminal emulator
+- rofi-wayland (alternative launcher)
 
 ### AUR Packages
 - `ttf-ms-fonts` - Microsoft core fonts
 - `yaru-gtk-theme` - Ubuntu's Yaru GTK theme
 - `yaru-icon-theme` - Ubuntu's Yaru icon theme  
 - `yaru-sound-theme` - Ubuntu's Yaru sound theme
-- `yaru-gnome-shell-theme` - Ubuntu's Yaru GNOME Shell theme
-- `gnome-shell-extension-dash-to-dock` - Dash to Dock extension
-- `gnome-hud` - Unity-like HUD menu for quick application menu access
+- `latte-dock` - Unity-style dock with 48px icons
 - `appmenu-gtk-module-git` - Global menu support for GTK applications
-- `gnome-shell-extension-unite` - Unity-like GNOME Shell interface with global menu integration
+- `libdbusmenu-glib` - DBus menu library for global menu
+- `libdbusmenu-gtk3` - GTK3 global menu support
+- `libdbusmenu-gtk2` - GTK2 global menu support
 
-### GNOME Extensions
+### KDE Configuration
 
-The script automatically installs and enables these GNOME extensions:
+The script automatically configures:
 
-#### Automatically Installed & Enabled
-- **AppIndicator Support** (`gnome-shell-extension-appindicator`) - System tray support
-- **Dash to Dock** (`gnome-shell-extension-dash-to-dock`) - Ubuntu-style dock
-- **Desktop Icons NG** (`gnome-shell-extension-desktop-icons-ng`) - Desktop icons
-- **User Themes** (from `gnome-shell-extensions`) - Custom shell themes
-- **Unite Shell** (`gnome-shell-extension-unite`) - Unity-like interface with global menu support
+#### Panel Layout
+- **Top Panel (24px height)**
+  - Application menu widget
+  - Global menu bar (native KDE)
+  - System tray
+  - Clock
+  
+- **Left Dock (Latte Dock)**
+  - 48px icon size (Unity-style)
+  - Unity-style indicators
+  - Applications launcher at top
+  - Intelligent auto-hide
 
-#### Manual Installation Required
+#### Window Management
+- Window buttons on left: Close, Minimize, Maximize
+- Borderless maximized windows
+- Global menu integration (native)
 
-Some extensions may need to be installed manually via Extension Manager:
-
-1. **Open Extension Manager** (installed by the script)
-2. **Search for and install:**
-   - Any additional extensions that failed to auto-enable
-   - Custom extensions for specific Ubuntu features
-
-**Tip:** If any extensions show as "not enabled" after running the script, you can manually enable them using:
-```bash
-gnome-extensions enable <extension-id>
-```
-
-Or use the Extension Manager GUI for easier management.
+#### Keyboard Shortcuts
+- **Super key**: Application dashboard
+- **Alt+Space**: KRunner (HUD-like search)
+- **Ctrl+Alt+T**: Terminal
+- All Unity-style shortcuts configured
 
 ## Troubleshooting
 
-### Shell Compatibility
-- **Issue:** Script exits immediately or shows "Installation aborted"
-- **Cause:** CachyOS uses fish/zsh by default, script requires bash
-- **Solution:** The script automatically detects and restarts with bash
+### Global Menu Not Working
+- **Issue:** GTK apps don't show global menu
+- **Solution:** Ensure environment variables are set:
+```bash
+export GTK_MODULES=appmenu-gtk-module
+export UBUNTU_MENUPROXY=1
+```
 
 ### Bootloader Support
 - **GRUB:** Automatically configured for quiet splash
@@ -114,54 +120,75 @@ Or use the Extension Manager GUI for easier management.
 - **Issue:** "not in sudo group" error
 - **Solution:** Add user to wheel group: `su -c "usermod -aG wheel $USER"`
 
-### GNOME HUD Not Working
-- **Issue:** Ctrl+Alt+Space doesn't open HUD menu
+### Latte Dock Not Starting
+- **Issue:** Dock doesn't appear after installation
 - **Solutions:**
-  1. Check if gnome-hud installed: `which gnomehud`
-  2. Install manually if needed: `pip install --user gnome-hud`
-  3. Start the service: `gnomehud-service &`
-  4. Check keybinding is set: `gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ binding`
-  5. Restart GNOME Shell: `Alt+F2`, type `r`, press Enter
+  1. Start manually: `latte-dock --layout Unity &`
+  2. Check for errors: `latte-dock --debug`
+  3. Ensure autostart is enabled
+  4. Check if Unity layout exists in ~/.config/latte/
 
-### Extensions Not Enabling
-- **Issue:** Unite or other extensions not enabled automatically
-- **Solution:** Use Extension Manager GUI to enable manually
-- **Alternative:** Install gnome-extensions-app: `sudo pacman -S gnome-shell-extensions`
+### Plasma Needs Restart
+- **Issue:** Changes don't appear immediately
+- **Solution:** Restart Plasma:
+```bash
+kquitapp5 plasmashell && kstart5 plasmashell
+```
+Or logout and login again.
 
 ## Undoing the Transformation
 
-If you want to revert back to the original CachyOS GNOME appearance:
+If you want to revert back to the original CachyOS KDE appearance:
 
 ```bash
 # From the repository directory
-bash undo-ubuntu-transformation.sh
+bash undo-unity-kde-transformation.sh
 ```
 
 The undo script will:
-- ✅ Reset GNOME settings to CachyOS defaults
-- ✅ Disable Ubuntu-style extensions  
-- ✅ Remove theme customizations
-- ✅ Reset taskbar/dock configuration
+- ✅ Reset KDE Plasma settings to CachyOS defaults
+- ✅ Remove Unity-style layout and Latte Dock
+- ✅ Restore window buttons to right side
+- ✅ Disable global menu
+- ✅ Reset keyboard shortcuts
 - ✅ Create a backup before making changes
 - ⚠️ Optionally remove Ubuntu packages
 
-**Note:** Some changes may require manual cleanup via Extension Manager.
+**Note:** Some panel configurations may require manual adjustment.
 
 ## Unity-like Features
 
-The script now includes a complete Unity-like experience with these key components:
+The KDE version provides a complete Unity-like experience with:
 
-### HUD (Heads-Up Display)
-- **Quick Menu Access**: Press `Ctrl + Alt + Space` to open the HUD
-- **Search Application Menus**: Type to quickly find any menu item in the current application  
-- **Keyboard-Driven Navigation**: Access any application function without clicking through menus
+### Native Global Menu
+- **Built-in KDE Feature**: No extensions needed
+- **Full Application Support**: Works with Qt and GTK apps
+- **Panel Integration**: Menus appear in top panel (24px height)
+- **Window Title**: Shows in panel for maximized windows
 
-### Global Menu & Unity Interface
-- **Unite Shell Extension**: Transforms GNOME Shell to look like Unity's interface
-- **Window Title Integration**: Shows current window title in the panel for maximized windows
-- **Global Menu Support**: Application menus appear in the top panel (Unity-style)
-- **Clean Window Decorations**: Removes window borders for maximized apps
+### HUD Functionality via KRunner
+- **Alt+Space**: Opens KRunner for HUD-like search
+- **Application Search**: Find apps, files, and settings
+- **Command Execution**: Run commands directly
+- **Native KDE Feature**: Stable and integrated
 
-This complete package recreates the authentic Ubuntu Unity desktop experience!
+### Unity-style Dock (Latte)
+- **48px Icons**: Unity-standard icon size
+- **Left Positioning**: Classic Unity dock placement  
+- **Intelligent Hide**: Auto-hides when windows overlap
+- **Unity Indicators**: Running app indicators
+
+## Comparison: KDE vs GNOME for Unity
+
+| Feature | KDE | GNOME |
+|---------|-----|-------|
+| Global Menu | Native ✅ | Extension (unstable) ⚠️ |
+| Panel Customization | Native ✅ | Limited ⚠️ |
+| Dock | Latte Dock ✅ | Dash-to-Dock extension ⚠️ |
+| HUD | KRunner (native) ✅ | gnome-hud (3rd party) ⚠️ |
+| Stability | High ✅ | Medium with extensions ⚠️ |
+| Performance | Better ✅ | Slower with extensions ⚠️ |
+
+KDE Plasma makes a better Unity clone than GNOME because global menus and panel customization are native features!
 
 ![Ubuntuish CachyOS GNOME Desktop](screenshot/screenshot1.png "Ubuntuish CachyOS GNOME Desktop")

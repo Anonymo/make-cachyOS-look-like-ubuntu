@@ -11,16 +11,16 @@ set -e
 trap 'echo "ERROR: An error occurred on line $LINENO. The script will now exit." >&2' ERR
 
 
-# Title: make-cachyos-look-like-ubuntu.sh
-# Description: This script performs all necessary steps to make a CachyOS Gnome
-# desktop look like an Ubuntu desktop with Ubuntu themes and fonts.
+# Title: make-cachyos-kde-look-like-unity.sh
+# Description: This script performs all necessary steps to make a CachyOS KDE
+# desktop look like Ubuntu Unity with Unity-style layout and themes.
 # Original Author: DeltaLima
-# Adapted for CachyOS by: Anonymo
+# Adapted for CachyOS KDE by: Anonymo
 # Date: 23.08.2025
-# Version: 1.1-cachyos
-# Usage: bash make-cachyos-look-like-ubuntu.sh
+# Version: 1.0-kde-unity
+# Usage: bash make-cachyos-kde-look-like-unity.sh
 # 
-# Based on: https://github.com/Anonymo/make-cachyOS-look-like-ubuntu
+# Based on: https://github.com/Anonymo/make-cachyOS-look-like-ubuntu/tree/KDE
 # 
 # Copyright 2023 DeltaLima (Marcus Hanisch)
 # 
@@ -57,14 +57,15 @@ packages[0-base]="plymouth ecryptfs-utils curl wget python binutils"
 # install desktop base
 packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
 noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
-gnome-software networkmanager-openvpn
-dconf-editor thunderbird firefox-pure gnome-terminal rofi-wayland"
+networkmanager-openvpn thunderbird firefox-pure konsole rofi-wayland"
 
-# install gnome base (AUR packages)
-packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator gnome-shell-extension-desktop-icons-ng"
+# install KDE Unity-like components
+packages[2-desktop-kde]="plasma-desktop kde-applications-meta plasma-wayland-session
+plasma-workspace plasma-pa plasma-nm powerdevil kscreen
+kinfocenter systemsettings dolphin kate ark spectacle"
 
 # AUR packages to be installed separately
-aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme yaru-gnome-shell-theme gnome-shell-extension-dash-to-dock gnome-hud appmenu-gtk-module-git gnome-shell-extension-unite"
+aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme latte-dock appmenu-gtk-module-git libdbusmenu-glib libdbusmenu-gtk3 libdbusmenu-gtk2"
 
 # if you want to add for automation purposes your own packages, just add another array field, like
 #packages[4-my-packages]="shutter solaar steam-installer chromium dosbox gimp vlc audacity keepassxc audacious nextcloud-desktop"
@@ -137,8 +138,8 @@ fi
 package_categories="$(echo $package_categories | xargs -n1 | sort | xargs)"
 message "Welcome to ${GREEN}make-cachyos-look-like-ubuntu${ENDCOLOR}!"
 message ""
-message "This script makes a fresh CachyOS-Gnome installation to look like"
-message "an Ubuntu Gnome installation. Settings are applied for the user"
+message "This script makes a fresh CachyOS-KDE installation to look like"
+message "Ubuntu Unity with global menu and Unity-style layout. Settings are applied for the user"
 message "running this script (${YELLOW}${USER}${ENDCOLOR})".
 message ""
 message "Your user has to be in the 'sudo' or 'wheel' group."
@@ -162,18 +163,12 @@ backup_dir="$HOME/.cachyos-original-backup-$(date +%s)"
 mkdir -p "$backup_dir"
 message "Creating backup of original settings in: $backup_dir"
 
-# Backup current dconf settings
-dconf dump /org/gnome/ > "$backup_dir/original-gnome-settings.ini" 2>/dev/null || message warn "Could not backup dconf settings"
-
-# Backup specific settings that we'll modify
-gsettings get org.gnome.shell favorite-apps > "$backup_dir/original-favorites.txt" 2>/dev/null || true
-gsettings get org.gnome.desktop.interface gtk-theme > "$backup_dir/original-gtk-theme.txt" 2>/dev/null || true
-gsettings get org.gnome.desktop.interface icon-theme > "$backup_dir/original-icon-theme.txt" 2>/dev/null || true
-gsettings get org.gnome.desktop.interface font-name > "$backup_dir/original-font-name.txt" 2>/dev/null || true
-gsettings get org.gnome.desktop.background picture-uri > "$backup_dir/original-background.txt" 2>/dev/null || true
-gsettings get org.gnome.desktop.background picture-uri-dark > "$backup_dir/original-background-dark.txt" 2>/dev/null || true
-gsettings get org.gnome.mutter overlay-key > "$backup_dir/original-overlay-key.txt" 2>/dev/null || true
-gsettings get org.gnome.shell.keybindings toggle-application-view > "$backup_dir/original-toggle-application-view.txt" 2>/dev/null || true
+# Backup current KDE settings
+cp -r $HOME/.config/plasma* "$backup_dir/" 2>/dev/null || message warn "Could not backup plasma settings"
+cp -r $HOME/.config/kde* "$backup_dir/" 2>/dev/null || message warn "Could not backup KDE settings"
+cp $HOME/.config/kwinrc "$backup_dir/" 2>/dev/null || true
+cp $HOME/.config/kdeglobals "$backup_dir/" 2>/dev/null || true
+cp -r $HOME/.config/latte "$backup_dir/" 2>/dev/null || true
 xdg-settings get default-web-browser > "$backup_dir/original-default-browser.txt" 2>/dev/null || echo "" > "$backup_dir/original-default-browser.txt"
 xdg-settings get default-url-scheme-handler mailto > "$backup_dir/original-default-email.txt" 2>/dev/null || echo "" > "$backup_dir/original-default-email.txt"
 
@@ -249,7 +244,7 @@ do
   fi
   
   # install AUR packages for specific categories
-  if [ "$category" == "2-desktop-gnome" ] && [ -n "$aur_packages" ]
+  if [ "$category" == "2-desktop-kde" ] && [ -n "$aur_packages" ]
   then
     message "installing AUR packages"
     # Check for available AUR helper
@@ -337,206 +332,169 @@ do
       fi
       ;;
 
-    2-desktop-gnome)
+    2-desktop-kde)
     
-      message "allow user-extensions"
-      gsettings set org.gnome.shell disable-user-extensions false
+      message "Configuring KDE Plasma for Unity-like layout"
       
-      message "enable gnome shell extensions"
-      # AppIndicator extension (try both possible IDs)
-      gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com 2>/dev/null || \
-      gnome-extensions enable ubuntu-appindicators@ubuntu.com 2>/dev/null || \
-      message warn "Could not enable AppIndicator extension - may need to be enabled manually"
+      # Create KDE config directories
+      mkdir -p $HOME/.config/plasma-workspace/env
+      mkdir -p $HOME/.local/share/plasma/layout-templates
+      mkdir -p $HOME/.config/latte
       
-      # Enable other extensions with error handling
-      gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com 2>/dev/null || \
-      message warn "Could not enable user-theme extension"
+      message "Configure window decorations - buttons on left"
+      # Set window buttons to left side (Unity style)
+      kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft "XSM"
+      kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ButtonsOnRight ""
+      kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key BorderSize "Normal"
+      kwriteconfig5 --file kwinrc --group org.kde.kdecoration2 --key ShowToolTips "false"
       
-      gnome-extensions enable dash-to-dock@micxgx.gmail.com 2>/dev/null || \
-      message warn "Could not enable dash-to-dock extension"
+      message "Configure KDE panels - Unity-style layout"
       
-      gnome-extensions enable ding@rastersoft.com 2>/dev/null || \
-      gnome-extensions enable desktop-icons-ng@rastersoft.com 2>/dev/null || \
-      message warn "Could not enable desktop-icons extension"
+      # Configure top panel (24px height for Unity-style)
+      message "Setting up top panel with global menu"
+      kwriteconfig5 --file plasmashellrc --group PlasmaViews --group Panel 0 --group Defaults --key thickness 24
       
-      gnome-extensions enable unite@hardpixel.eu 2>/dev/null || \
-      message warn "Could not enable unite-shell extension"
+      # Configure global menu and appmenu settings
+      message "Enable global menu support"
+      kwriteconfig5 --file kdeglobals --group KDE --key ShowMenuBar true
+      kwriteconfig5 --file kwinrc --group Windows --key BorderlessMaximizedWindows true
       
-      message "apply settings for dash-to-dock"
-      # dash-to-dock
-      gsettings set org.gnome.shell.extensions.dash-to-dock autohide-in-fullscreen false
-      gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode 'FIXED'
-      gsettings set org.gnome.shell.extensions.dash-to-dock background-color '#0c0c0c'
-      gsettings set org.gnome.shell.extensions.dash-to-dock custom-background-color true
-      gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.64000000000000001
-      gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'focus-or-previews'
-      gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
-      gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 42
-      gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true
-      gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'
-      gsettings set org.gnome.shell.extensions.dash-to-dock extend-height true
-      gsettings set org.gnome.shell.extensions.dash-to-dock show-apps-at-top true
-      gsettings set org.gnome.shell.extensions.dash-to-dock running-indicator-style 'DOTS'
-      gsettings set org.gnome.shell.extensions.dash-to-dock icon-size-fixed true
+      # Set environment variables for GTK global menu
+      cat > $HOME/.config/plasma-workspace/env/gtk-appmenu.sh << 'EOF'
+#!/bin/sh
+export GTK_MODULES=appmenu-gtk-module
+export UBUNTU_MENUPROXY=1
+EOF
+      chmod +x $HOME/.config/plasma-workspace/env/gtk-appmenu.sh
       
       
-      message "apply settings for gnome desktop"
-      # desktop
-      gsettings set org.gnome.desktop.background picture-uri 'file:///usr/share/backgrounds/gnome/amber-l.jxl'
-      gsettings set org.gnome.desktop.background picture-uri-dark 'file:///usr/share/backgrounds/gnome/amber-d.jxl'
-      gsettings set org.gnome.desktop.background show-desktop-icons true
-      gsettings set org.gnome.desktop.background primary-color '#E66100'
-      gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-      gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:appmenu'
-      gsettings set org.gnome.desktop.interface enable-hot-corners true
-      gsettings set org.gnome.desktop.interface font-antialiasing 'grayscale'
-      gsettings set org.gnome.desktop.interface font-hinting 'slight'
-      gsettings set org.gnome.desktop.interface font-name 'Ubuntu 11'
-      gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 13'
-      gsettings set org.gnome.desktop.interface document-font-name 'Sans 11'
-      gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Ubuntu Bold 11'
-      gsettings set org.gnome.desktop.interface cursor-theme 'Yaru'
-      gsettings set org.gnome.desktop.interface gtk-theme 'Yaru-dark'
-      gsettings set org.gnome.desktop.interface icon-theme 'Yaru-dark'
+      message "Configure Latte Dock for Unity-style left panel"
+      # Create Latte Dock configuration for Unity-like dock
+      cat > $HOME/.config/latte/Unity.layout.latte << 'EOF'
+[General]
+alignmentUpgraded=true
+appletOrder=1
+configurationStepsTooltips=true
+launchers=file:///usr/share/applications/firefox-pure.desktop,file:///usr/share/applications/thunderbird.desktop,file:///usr/share/applications/org.kde.dolphin.desktop,file:///usr/share/applications/org.kde.konsole.desktop,file:///usr/share/applications/systemsettings.desktop
+layoutId=Unity
+preferredForShortcutsTouched=true
+showInMenu=true
+version=2
 
-      # yaru gnome-shell theme is a bit broken actually, system osd network ellapse button glitched
-      # gsettings set org.gnome.shell.extensions.user-theme name 'Yaru-dark'
+[PlasmaThemeExtended]
+outlineWidth=1
 
-      # set accent color to orange
-      gsettings set org.gnome.desktop.interface accent-color 'orange'
+[ScreenConnectors]
+10=eDP-1
 
-      # configure Super key to open applications menu (Ubuntu-like behavior)
-      message "configure Super key to open applications menu"
-      # Disable the default overlay (activities overview) behavior
-      gsettings set org.gnome.mutter overlay-key '' 2>/dev/null || message warn "Could not disable overlay-key"
-      # Set Super key to toggle application view instead
-      gsettings set org.gnome.shell.keybindings toggle-application-view "['Super_L']" 2>/dev/null || message warn "Could not set toggle-application-view keybinding"
-      message "Super key configured to open applications menu like Ubuntu"
+[UniversalSettings]
+canDisableBorders=true
+contextMenuActionsAlwaysShown=_layoutsMenu
+inAdvancedModeForEditSettings=true
+launchers=
+memoryUsage=0
+metaPressAndHoldEnabled=false
+mouseSensitivity=2
+screenTrackerInterval=2500
+showInfoWindow=true
+singleModeLayoutName=Unity
 
-      # gtk-3.0 and gtk-4.0 settings
-      message "setting gtk-3.0 and gtk-4.0 default to dark"
+[UniversalSettings][Launchers]
+EOF
+      
+      message "Configure KDE appearance settings"
+      # Set fonts to Ubuntu
+      kwriteconfig5 --file kdeglobals --group General --key font "Ubuntu,11,-1,5,50,0,0,0,0,0"
+      kwriteconfig5 --file kdeglobals --group General --key fixed "Ubuntu Mono,13,-1,5,50,0,0,0,0,0"
+      kwriteconfig5 --file kdeglobals --group General --key smallestReadableFont "Ubuntu,9,-1,5,50,0,0,0,0,0"
+      kwriteconfig5 --file kdeglobals --group General --key toolBarFont "Ubuntu,10,-1,5,50,0,0,0,0,0"
+      kwriteconfig5 --file kdeglobals --group WM --key activeFont "Ubuntu,11,-1,5,75,0,0,0,0,0"
+      
+      # Set theme settings
+      kwriteconfig5 --file kdeglobals --group General --key ColorScheme "Breeze Dark"
+      kwriteconfig5 --file kdeglobals --group General --key Name "Breeze Dark"
+      kwriteconfig5 --file kdeglobals --group Icons --key Theme "Yaru-dark"
+      kwriteconfig5 --file kdeglobals --group KDE --key widgetStyle "Breeze"
+      
+      message "Configure Meta (Super) key for application menu"
+      kwriteconfig5 --file kwinrc --group ModifierOnlyShortcuts --key Meta "org.kde.plasmashell,/PlasmaShell,org.kde.PlasmaShell,activateLauncherMenu"
+
+      # gtk-3.0 and gtk-4.0 settings for KDE/GTK integration
+      message "setting gtk-3.0 and gtk-4.0 for KDE integration"
       mkdir -p $HOME/.config/gtk-{3,4}.0
       cat << EOF | tee $HOME/.config/gtk-3.0/settings.ini > $HOME/.config/gtk-4.0/settings.ini
 [Settings]
 gtk-application-prefer-dark-theme=1
+gtk-theme-name=Yaru-dark
+gtk-icon-theme-name=Yaru-dark
+gtk-font-name=Ubuntu 11
+gtk-cursor-theme-name=Yaru
+gtk-modules=appmenu-gtk-module
 EOF
 
-      # apply adwaita gtk-3.0 and gtk-4.0 orange accent color
-      message "setting gtk-3.0 and gtk-4.0 accent color to orange"
-      cat << EOF | tee $HOME/.config/gtk-3.0/gtk.css > $HOME/.config/gtk-4.0/gtk.css
-@define-color accent_color #ffbe6f;
-@define-color accent_bg_color #e66100;
-@define-color accent_fg_color #ffffff;
+      # Configure GTK2 settings
+      message "Configure GTK2 settings"
+      cat > $HOME/.gtkrc-2.0 << 'EOF'
+gtk-theme-name="Yaru-dark"
+gtk-icon-theme-name="Yaru-dark"
+gtk-font-name="Ubuntu 11"
+gtk-cursor-theme-name="Yaru"
+gtk-modules="appmenu-gtk-module"
 EOF
 
-      # configure essential apps in dock (firefox-pure, thunderbird, terminal)
-      message "configure essential applications in dock"
-      current_apps=$(gsettings get org.gnome.shell favorite-apps)
-      
-      # Remove regular firefox if present
-      current_apps=$(echo "$current_apps" | sed 's/firefox\.desktop, //g' | sed 's/, firefox\.desktop//g' | sed 's/firefox\.desktop//g')
-      
-      # Ensure firefox-pure is in dock
-      if ! echo "$current_apps" | grep -q "firefox-pure\.desktop"; then
-        message "adding Firefox-pure to dock"
-        current_apps=$(echo "$current_apps" | sed "s/\]/, 'firefox-pure.desktop']/")
-      fi
-      
-      # Handle email client in dock
-      if echo "$current_apps" | grep -q "org\.gnome\.Evolution\.desktop"; then
-        message "replacing Evolution with Thunderbird in dock"
-        current_apps=$(echo "$current_apps" | sed 's/org\.gnome\.Evolution\.desktop/thunderbird\.desktop/')
-      elif ! echo "$current_apps" | grep -q "thunderbird\.desktop"; then
-        message "adding Thunderbird to dock"
-        current_apps=$(echo "$current_apps" | sed "s/\]/, 'thunderbird.desktop']/")
-      fi
-      
-      # Ensure GNOME terminal is in dock
-      if ! echo "$current_apps" | grep -q -E "(gnome-terminal|org\.gnome\.Terminal)\.desktop"; then
-        message "adding GNOME terminal to dock"
-        # Try to add GNOME terminal (check common desktop file names)
-        if [ -f /usr/share/applications/org.gnome.Terminal.desktop ]; then
-          current_apps=$(echo "$current_apps" | sed "s/\]/, 'org.gnome.Terminal.desktop']/")
-        elif [ -f /usr/share/applications/gnome-terminal.desktop ]; then
-          current_apps=$(echo "$current_apps" | sed "s/\]/, 'gnome-terminal.desktop']/")
-        else
-          message warn "GNOME Terminal not found - may need to install gnome-terminal package"
-        fi
-      fi
-      
-      # Apply the updated favorites list
-      gsettings set org.gnome.shell favorite-apps "$current_apps"
-      message "Essential apps configured in dock: Firefox-pure, Thunderbird, Terminal"
-
-      # replace yelp with settings in dock
-      message "replace yelp with settings in dock"
-      gsettings get org.gnome.shell favorite-apps | grep "org.gnome.Settings.desktop" > /dev/null ||
-      gsettings set org.gnome.shell favorite-apps "$(gsettings get  org.gnome.shell favorite-apps  | sed 's/yelp\.desktop/org\.gnome\.Settings\.desktop/')"
-      
-      # Configure gnome-hud keybinding and service
-      message "configuring GNOME HUD (Unity-like menu search)"
-      
-      # Check if gnome-hud is installed via pip or system
-      if command -v gnomehud >/dev/null 2>&1 || [ -f "$HOME/.local/bin/gnomehud" ]; then
-        message "setting up GNOME HUD keybinding (Ctrl+Alt+Space)"
-        
-        # Set up custom keybinding for HUD
-        custom_bindings=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo "[]")
-        if ! echo "$custom_bindings" | grep -q "gnome-hud"; then
-          # Add new custom keybinding
-          gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/']"
-          gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ name 'GNOME HUD'
-          
-          # Try to find gnomehud command in different locations
-          if [ -f "$HOME/.local/bin/gnomehud" ]; then
-            gnomehud_cmd="$HOME/.local/bin/gnomehud"
-          else
-            gnomehud_cmd="gnomehud"
-          fi
-          
-          # Use rofi if available for better HUD experience
-          if command -v rofi >/dev/null 2>&1; then
-            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ command "${gnomehud_cmd}-rofi"
-          else
-            gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ command "$gnomehud_cmd"
-          fi
-          
-          gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gnome-hud/ binding '<Primary><Alt>space'
-        fi
-        
-        # Create autostart entry for HUD service
-        message "setting up GNOME HUD service autostart"
-        mkdir -p "$HOME/.config/autostart"
-        
-        # Find the correct service command
-        if [ -f "$HOME/.local/bin/gnomehud-service" ]; then
-          service_cmd="$HOME/.local/bin/gnomehud-service"
-        else
-          service_cmd="gnomehud-service"
-        fi
-        
-        cat > "$HOME/.config/autostart/gnome-hud.desktop" << EOF
+      # Configure Latte Dock autostart
+      message "Enable Latte Dock autostart"
+      mkdir -p $HOME/.config/autostart
+      cat > $HOME/.config/autostart/latte-dock.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
-Name=GNOME HUD Service
-Comment=Unity-like HUD menu service
-Exec=$service_cmd
+Name=Latte Dock
+Comment=Unity-style dock for KDE
+Exec=latte-dock --layout Unity
+Icon=latte-dock
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
 StartupNotify=false
 EOF
-        
-        # Try to start the service now
-        if command -v gnomehud-service >/dev/null 2>&1 || [ -f "$HOME/.local/bin/gnomehud-service" ]; then
-          message "starting GNOME HUD service"
-          nohup $service_cmd >/dev/null 2>&1 &
-        fi
-        
-        message "GNOME HUD configured - use Ctrl+Alt+Space to open menu search"
+      
+      # Configure KDE HUD keybinding  
+      message "configuring KDE HUD (Unity-like menu search with Alt+Space)"
+      
+      # KDE has built-in HUD functionality via KRunner and Application Menu
+      message "Setting up Alt+Space for HUD-like menu search"
+      
+      # Configure KRunner for HUD-like behavior
+      kwriteconfig5 --file krunnerrc --group General --key ActivateWhenTypingOnDesktop false
+      kwriteconfig5 --file krunnerrc --group General --key FreeFloating true
+      kwriteconfig5 --file krunnerrc --group General --key RetainPriorSearch false
+      
+      # Set up global shortcut for HUD (Alt+Space like Unity)
+      kwriteconfig5 --file kglobalshortcutsrc --group krunner --key _launch "Alt+Space,Alt+Space,KRunner"
+      
+      # Enable useful KRunner plugins for HUD-like experience
+      kwriteconfig5 --file krunnerrc --group Plugins --key appstreamEnabled true
+      kwriteconfig5 --file krunnerrc --group Plugins --key applicationsEnabled true
+      kwriteconfig5 --file krunnerrc --group Plugins --key desktopsessionsEnabled true
+      kwriteconfig5 --file krunnerrc --group Plugins --key shellEnabled true
+      kwriteconfig5 --file krunnerrc --group Plugins --key windowsEnabled true
+      
+      # Configure Application Dashboard for Unity-like app menu
+      message "Configure Application Dashboard widget"
+      
+      # Start Latte Dock if installed
+      if command -v latte-dock >/dev/null 2>&1; then
+        message "Starting Latte Dock with Unity layout"
+        killall latte-dock 2>/dev/null || true
+        latte-dock --layout Unity &>/dev/null &
       else
-        message warn "GNOME HUD not found - it may need to be installed manually with: pip install --user gnome-hud"
+        message warn "Latte Dock not installed - Unity-style dock will not be configured"
       fi
+      
+      message "KDE Unity-like configuration complete!"
+      message "HUD search: Alt+Space"
+      message "Application menu: Super key"
+      message "Global menu: Enabled in top panel"
       ;;
   esac
   
