@@ -56,7 +56,6 @@ When the script runs the first time, it is normal that the terminal font looks d
 - Ubuntu fonts, Liberation fonts, Noto fonts
 - Plymouth, GNOME extensions, GNOME tweaks
 - GNOME Software (package manager GUI)
-- NetworkManager OpenVPN support
 - Thunderbird email client
 - rofi-wayland (menu system for HUD functionality)
 

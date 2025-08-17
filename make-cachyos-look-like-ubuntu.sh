@@ -57,8 +57,7 @@ packages[0-base]="plymouth ecryptfs-utils curl wget python binutils"
 # install desktop base
 packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
 noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
-gnome-software networkmanager-openvpn
-dconf-editor thunderbird firefox-pure gnome-terminal rofi-wayland"
+gnome-software dconf-editor thunderbird firefox-pure gnome-terminal rofi-wayland"
 
 # install gnome base (AUR packages)
 packages[2-desktop-gnome]="extension-manager gnome-tweaks gnome-shell-extensions gnome-shell-extension-appindicator gnome-shell-extension-desktop-icons-ng"
