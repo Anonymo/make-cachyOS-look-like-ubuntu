@@ -45,7 +45,7 @@ git clone -b KDE https://github.com/Anonymo/make-cachyOS-look-like-ubuntu.git
 cd make-cachyOS-look-like-ubuntu
 
 # Run the transformation script
-bash make-cachyos-look-like-ubuntu.sh
+bash make-cachyos-kde-look-like-unity.sh
 ```
 
 **Important!** After the first run, you have to **reboot and re-run** the script. 
