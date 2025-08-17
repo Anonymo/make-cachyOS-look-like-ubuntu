@@ -120,9 +120,80 @@ confirm_continue()
 
 ###
 
+# Pre-flight validation checks
+function validate_system() {
+    local validation_errors=0
+    
+    message "🔍 Running pre-flight validation checks..."
+    
+    # Check if running as root
+    if [ "$(whoami)" == "root" ]; then
+        message error "Cannot run as root user"
+        return 1
+    fi
+    
+    # Check desktop environment
+    if [ -z "$XDG_CURRENT_DESKTOP" ]; then
+        message warn "Could not detect desktop environment"
+    elif [[ "$XDG_CURRENT_DESKTOP" != *"GNOME"* ]]; then
+        message warn "This script is designed for GNOME. Current DE: $XDG_CURRENT_DESKTOP"
+        message warn "Some features may not work correctly"
+    else
+        message info "✅ GNOME desktop environment detected"
+    fi
+    
+    # Check internet connectivity
+    if ping -c 1 -W 3 8.8.8.8 >/dev/null 2>&1; then
+        message info "✅ Internet connectivity verified"
+    else
+        message error "❌ No internet connection detected"
+        message error "Internet connection required for package downloads"
+        ((validation_errors++))
+    fi
+    
+    # Check available disk space (at least 2GB recommended)
+    local available_mb=$(df -BM "$HOME" 2>/dev/null | awk 'NR==2 {print $4}' | sed 's/M//' 2>/dev/null || echo "0")
+    if [ "$available_mb" -gt 2048 ]; then
+        message info "✅ Sufficient disk space available (${available_mb}MB)"
+    else
+        message warn "⚠️ Low disk space: ${available_mb}MB available (2GB+ recommended)"
+    fi
+    
+    # Check if pacman is available
+    if command -v pacman >/dev/null 2>&1; then
+        message info "✅ Pacman package manager available"
+    else
+        message error "❌ Pacman not found - this script requires Arch-based distribution"
+        ((validation_errors++))
+    fi
+    
+    # Check for AUR helper
+    if command -v yay >/dev/null 2>&1; then
+        message info "✅ yay AUR helper detected"
+    elif command -v paru >/dev/null 2>&1; then
+        message info "✅ paru AUR helper detected"
+    else
+        message warn "⚠️ No AUR helper found (yay/paru) - some packages may need manual installation"
+    fi
+    
+    if [ $validation_errors -gt 0 ]; then
+        message error "Pre-flight validation failed with $validation_errors critical errors"
+        message error "Please resolve the issues above before continuing"
+        return 1
+    else
+        message info "✅ Pre-flight validation completed successfully"
+        return 0
+    fi
+}
+
 if [ "$(whoami)" == "root" ]
 then message error "I cannot run as root"
 error
+fi
+
+# Run validation checks
+if ! validate_system; then
+    exit 1
 fi
 
 if [ -z "$arguments" ]
