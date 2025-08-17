@@ -194,4 +194,4 @@ To ensure reliability and avoid issues with external repositories going offline,
 
 ## Screenshot
 
-![Ubuntuish CachyOS KDE Desktop](screenshot/screenshot1.png "Ubuntuish CachyOS KDE Desktop")
+**📸 Screenshot coming soon** - KDE Unity transformation in progress
