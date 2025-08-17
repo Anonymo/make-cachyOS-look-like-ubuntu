@@ -57,7 +57,6 @@ When the script runs the first time, it is normal that the terminal font looks d
 - Ubuntu fonts, Liberation fonts, Noto fonts
 - Plymouth for boot splash
 - KDE Plasma desktop and applications
-- NetworkManager OpenVPN support
 - Thunderbird email client
 - Konsole terminal emulator
 - rofi-wayland (alternative launcher)

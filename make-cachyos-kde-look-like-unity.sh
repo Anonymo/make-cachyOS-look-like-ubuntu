@@ -57,7 +57,7 @@ packages[0-base]="plymouth ecryptfs-utils curl wget python binutils"
 # install desktop base
 packages[1-desktop-base]="ttf-ubuntu-font-family ttf-liberation
 noto-fonts noto-fonts-emoji ttf-dejavu ttf-hack
-networkmanager-openvpn thunderbird firefox-pure konsole rofi-wayland"
+thunderbird firefox-pure konsole rofi-wayland"
 
 # install KDE Unity-like components
 packages[2-desktop-kde]="plasma-desktop kde-applications-meta plasma-wayland-session
