@@ -65,7 +65,7 @@ plasma-workspace plasma-pa plasma-nm powerdevil kscreen
 kinfocenter systemsettings dolphin kate ark spectacle"
 
 # AUR packages to be installed separately
-aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme latte-dock appmenu-gtk-module-git libdbusmenu-glib libdbusmenu-gtk3 libdbusmenu-gtk2"
+aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme latte-dock appmenu-gtk-module-git libdbusmenu-glib libdbusmenu-gtk3 libdbusmenu-gtk2 ubuntu-wallpapers libreoffice-style-yaru-fullcolor"
 
 # Optional Kvantum theming for KDE
 kvantum_packages="kvantum"
