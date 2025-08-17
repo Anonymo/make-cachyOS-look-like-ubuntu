@@ -72,6 +72,14 @@ When the script runs the first time, it is normal that the terminal font looks d
 - `libdbusmenu-gtk3` - GTK3 global menu support
 - `libdbusmenu-gtk2` - GTK2 global menu support
 
+### Optional KDE Yaru Theming
+The script will optionally offer to install:
+- `kvantum` - Advanced theming engine for KDE
+- **KvYaru-Colors** - Yaru-style themes specifically designed for KDE/Plasma
+  - Downloaded from: https://github.com/GabePoel/KvYaru-Colors
+  - Provides native Yaru styling for KDE applications
+  - Activated via Kvantum Manager
+
 ### KDE Configuration
 
 The script automatically configures:
@@ -137,6 +145,15 @@ The script will ask if you want to configure bootloader for quiet splash:
 kquitapp5 plasmashell && kstart5 plasmashell
 ```
 Or logout and login again.
+
+### KvYaru-Colors Theme Not Working
+- **Issue:** Kvantum themes not appearing or working
+- **Solutions:**
+  1. Open Kvantum Manager: `kvantummanager`
+  2. Select a Yaru theme variant from the list
+  3. Click "Use this theme"
+  4. Go to System Settings > Appearance > Application Style > Select "Kvantum"
+  5. Restart applications to see changes
 
 ## Undoing the Transformation
 

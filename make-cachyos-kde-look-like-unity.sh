@@ -67,6 +67,9 @@ kinfocenter systemsettings dolphin kate ark spectacle"
 # AUR packages to be installed separately
 aur_packages="ttf-ms-fonts yaru-gtk-theme yaru-icon-theme yaru-sound-theme latte-dock appmenu-gtk-module-git libdbusmenu-glib libdbusmenu-gtk3 libdbusmenu-gtk2"
 
+# Optional Kvantum theming for KDE
+kvantum_packages="kvantum"
+
 # if you want to add for automation purposes your own packages, just add another array field, like
 #packages[4-my-packages]="shutter solaar steam-installer chromium dosbox gimp vlc audacity keepassxc audacious nextcloud-desktop"
 
@@ -504,10 +507,80 @@ EOF
         message warn "Latte Dock not installed - Unity-style dock will not be configured"
       fi
       
+      # Optional KvYaru-Colors Kvantum theme installation
+      message ""
+      message "Optional: Install KvYaru-Colors theme for native KDE Yaru styling?"
+      message "This adds Kvantum theming engine and Yaru-style themes specifically for KDE"
+      message warn "This downloads themes from GitHub (https://github.com/GabePoel/KvYaru-Colors)"
+      read -p "[y/N?] " install_kvyaru
+      install_kvyaru_lower=$(echo "$install_kvyaru" | tr '[:upper:]' '[:lower:]')
+      
+      if [ "$install_kvyaru_lower" = "y" ] || [ "$install_kvyaru_lower" = "yes" ]; then
+        message "Installing Kvantum theming engine..."
+        
+        # Install Kvantum from AUR
+        if command -v yay &> /dev/null; then
+          yay -S --needed --noconfirm $kvantum_packages || message warn "Failed to install Kvantum"
+        elif command -v paru &> /dev/null; then
+          paru -S --needed --noconfirm $kvantum_packages || message warn "Failed to install Kvantum"
+        else
+          message warn "No AUR helper found - cannot install Kvantum automatically"
+        fi
+        
+        # Download and install KvYaru-Colors themes
+        if command -v kvantummanager >/dev/null 2>&1 || [ -f /usr/bin/kvantummanager ]; then
+          message "Downloading KvYaru-Colors themes..."
+          
+          # Create temporary directory
+          temp_dir="/tmp/kvyaru-colors-$$"
+          mkdir -p "$temp_dir"
+          
+          # Download the theme
+          if command -v git >/dev/null 2>&1; then
+            git clone https://github.com/GabePoel/KvYaru-Colors.git "$temp_dir" 2>/dev/null || {
+              message warn "Failed to download KvYaru-Colors theme"
+              rm -rf "$temp_dir"
+              message "You can install it manually from: https://github.com/GabePoel/KvYaru-Colors"
+            }
+            
+            if [ -d "$temp_dir" ] && [ -f "$temp_dir/install.sh" ]; then
+              message "Installing KvYaru-Colors themes..."
+              cd "$temp_dir"
+              chmod +x install.sh
+              ./install.sh 2>/dev/null || {
+                message warn "Automatic installation failed, trying manual install..."
+                mkdir -p "$HOME/.config/Kvantum"
+                cp -r src/* "$HOME/.config/Kvantum/" 2>/dev/null || message warn "Manual installation also failed"
+              }
+              cd - >/dev/null
+              rm -rf "$temp_dir"
+              
+              message "KvYaru-Colors themes installed!"
+              message "You can activate them via:"
+              message "1. Open 'Kvantum Manager' from applications"
+              message "2. Select a Yaru theme variant"
+              message "3. Go to System Settings > Appearance > Application Style > Kvantum"
+            fi
+          else
+            message warn "Git not found - cannot download KvYaru-Colors automatically"
+            message "Install manually from: https://github.com/GabePoel/KvYaru-Colors"
+          fi
+        else
+          message warn "Kvantum not properly installed - skipping theme download"
+        fi
+      else
+        message "Skipping KvYaru-Colors installation (you can install manually later)"
+        message "Available at: https://github.com/GabePoel/KvYaru-Colors"
+      fi
+      
+      message ""
       message "KDE Unity-like configuration complete!"
       message "HUD search: Alt+Space"
       message "Application menu: Super key"
       message "Global menu: Enabled in top panel"
+      if [ "$install_kvyaru_lower" = "y" ] || [ "$install_kvyaru_lower" = "yes" ]; then
+        message "Kvantum themes: Open 'Kvantum Manager' to select Yaru theme"
+      fi
       ;;
   esac
   
