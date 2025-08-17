@@ -46,6 +46,35 @@ trap 'echo "ERROR: An error occurred on line $LINENO. The script will now exit."
 
 arguments="$@"
 
+# Check if user wants status check only
+if [ "$1" = "--status" ] || [ "$1" = "-s" ]; then
+    message "🔍 Unity Transformation Status Check"
+    message "====================================="
+    validate_configuration
+    exit $?
+fi
+
+# Display help if requested
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    message "🛠️ Unity Transformation Script for CachyOS KDE"
+    message "Usage: $0 [OPTIONS] [CATEGORIES]"
+    message ""
+    message "Options:"
+    message "  --status, -s    Check current transformation status"
+    message "  --help, -h      Show this help message"
+    message ""
+    message "Categories:"
+    message "  0-base          Base system packages and configuration"
+    message "  1-desktop-base  Desktop environment packages"
+    message "  2-desktop-kde   KDE-specific packages and configuration"
+    message ""
+    message "Examples:"
+    message "  $0                    # Full transformation"
+    message "  $0 --status          # Check current status"
+    message "  $0 2-desktop-kde     # Install only KDE packages"
+    exit 0
+fi
+
 # define the $packages[] array
 declare -A packages
 
