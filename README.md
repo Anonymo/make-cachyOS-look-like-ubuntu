@@ -50,6 +50,8 @@ bash undo-unity-kde-transformation.sh
 - `latte-dock` - Unity-style dock with 48px icons
 - `appmenu-gtk-module-git` - Global menu support for GTK apps
 - `libdbusmenu-*` - DBus menu libraries
+- `ubuntu-wallpapers` - Authentic Ubuntu wallpaper collection
+- `libreoffice-style-yaru-fullcolor` - Yaru-styled LibreOffice icons
 
 ### Optional KDE Yaru Theming
 - `kvantum` - Advanced theming engine for KDE
@@ -142,6 +144,13 @@ To ensure reliability and avoid issues with external repositories going offline,
 - Original by Gabriel Pöl: `https://github.com/GabePoel/KvYaru-Colors`
 - Script tries our fork first, falls back to original if needed
 - This ensures continued functionality even if external repositories change
+
+### AUR Package Backups
+- All AUR packages are backed up in `aur-backups/` directory
+- PKGBUILDs stored locally for offline building if AUR is unavailable
+- Backup script: `backup-aur-packages.sh` (run periodically to update)
+- Covers all project dependencies: themes, fonts, extensions, wallpapers
+- Manual installation possible via `makepkg -si` from backup directories
 
 </details>
 
