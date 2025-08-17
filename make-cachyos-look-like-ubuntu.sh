@@ -120,6 +120,70 @@ confirm_continue()
 
 ###
 
+# Retry mechanism for network operations
+function retry_command() {
+    local max_attempts=3
+    local delay=2
+    local attempt=1
+    local command=("$@")
+    
+    while [ $attempt -le $max_attempts ]; do
+        message info "Attempt $attempt/$max_attempts: ${command[*]}"
+        
+        if "${command[@]}"; then
+            return 0
+        else
+            if [ $attempt -lt $max_attempts ]; then
+                message warn "Attempt $attempt failed, retrying in ${delay}s..."
+                sleep $delay
+                delay=$((delay * 2))  # Exponential backoff
+            else
+                message error "All $max_attempts attempts failed for: ${command[*]}"
+                return 1
+            fi
+        fi
+        ((attempt++))
+    done
+}
+
+# Enhanced package installation with retry and progress tracking
+function install_packages_retry() {
+    local package_manager="$1"
+    shift
+    local packages=("$@")
+    local package_count=${#packages[@]}
+    
+    if [ $package_count -eq 1 ]; then
+        message "📦 Installing package: ${packages[*]}"
+    else
+        message "📦 Installing $package_count packages: ${packages[*]}"
+    fi
+    
+    case "$package_manager" in
+        "pacman")
+            retry_command sudo pacman -S --needed --noconfirm "${packages[@]}"
+            ;;
+        "yay")
+            retry_command yay -S --needed --noconfirm "${packages[@]}"
+            ;;
+        "paru")
+            retry_command paru -S --needed --noconfirm "${packages[@]}"
+            ;;
+        *)
+            message error "Unknown package manager: $package_manager"
+            return 1
+            ;;
+    esac
+    
+    if [ $? -eq 0 ]; then
+        if [ $package_count -eq 1 ]; then
+            message info "✅ Package installed successfully"
+        else
+            message info "✅ All $package_count packages installed successfully"
+        fi
+    fi
+}
+
 # Pre-flight validation checks
 function validate_system() {
     local validation_errors=0
@@ -292,9 +356,14 @@ fi
 
 
 # iterate through $packages
+categories_array=($package_categories)
+total_categories=${#categories_array[@]}
+current_category=0
+
 for category in $package_categories
 do
-  message "Packages category: ${YELLOW}${category}${ENDCOLOR}"
+  ((current_category++))
+  message "📋 Processing category [$current_category/$total_categories]: ${YELLOW}${category}${ENDCOLOR}"
   message "Packages contained: "
   message "${GREEN}${packages[$category]}${ENDCOLOR}"
   
@@ -313,8 +382,8 @@ do
   
   # package installation #
   message "installing packages"
-  if ! sudo pacman -S --needed --noconfirm ${packages[$category]}; then
-    message error "Failed to install packages: ${packages[$category]}"
+  if ! install_packages_retry "pacman" ${packages[$category]}; then
+    message error "Failed to install packages after retries: ${packages[$category]}"
     error
   fi
   
@@ -326,8 +395,8 @@ do
     if command -v yay &> /dev/null
     then
       message "using yay for AUR packages"
-      if ! yay -S --needed --noconfirm $aur_packages; then
-        message warn "Some AUR packages failed to install"
+      if ! install_packages_retry "yay" $aur_packages; then
+        message warn "Some AUR packages failed to install after retries"
         # Try to install gnome-hud via pip as fallback
         if ! command -v gnomehud >/dev/null 2>&1 && ! [ -f "$HOME/.local/bin/gnomehud" ]; then
           message "installing gnome-hud via pip as fallback"
@@ -337,8 +406,8 @@ do
     elif command -v paru &> /dev/null
     then
       message "using paru for AUR packages"
-      if ! paru -S --needed --noconfirm $aur_packages; then
-        message warn "Some AUR packages failed to install"
+      if ! install_packages_retry "paru" $aur_packages; then
+        message warn "Some AUR packages failed to install after retries"
         # Try to install gnome-hud via pip as fallback
         if ! command -v gnomehud >/dev/null 2>&1 && ! [ -f "$HOME/.local/bin/gnomehud" ]; then
           message "installing gnome-hud via pip as fallback"
