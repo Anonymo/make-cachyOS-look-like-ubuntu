@@ -27,7 +27,7 @@ bash make-cachyos-kde-look-like-unity.sh
 - ✅ **Built-in HUD** - KRunner provides native Alt+Space search
 
 <details>
-<summary><strong>📦 What Gets Installed</strong></summary>
+<summary><strong>➕ 📦 What Gets Installed (click to expand)</strong></summary>
 
 ### Official Repository Packages
 - Ubuntu fonts, Liberation fonts, Noto fonts
@@ -55,7 +55,7 @@ bash make-cachyos-kde-look-like-unity.sh
 </details>
 
 <details>
-<summary><strong>⚙️ KDE Configuration Details</strong></summary>
+<summary><strong>➕ ⚙️ KDE Configuration Details (click to expand)</strong></summary>
 
 ### Panel Layout
 - **Top Panel (24px height)**
@@ -82,7 +82,7 @@ bash make-cachyos-kde-look-like-unity.sh
 </details>
 
 <details>
-<summary><strong>🔧 Troubleshooting</strong></summary>
+<summary><strong>➕ 🔧 Troubleshooting (click to expand)</strong></summary>
 
 ### Global Menu Not Working
 **Issue:** GTK apps don't show global menu  
@@ -118,7 +118,7 @@ The script will ask if you want to configure bootloader for quiet splash:
 </details>
 
 <details>
-<summary><strong>🔄 Undoing the Transformation</strong></summary>
+<summary><strong>➕ 🔄 Undoing the Transformation (click to expand)</strong></summary>
 
 ```bash
 # From the repository directory
@@ -136,7 +136,7 @@ The undo script will:
 </details>
 
 <details>
-<summary><strong>🛡️ Dependency Management</strong></summary>
+<summary><strong>➕ 🛡️ Dependency Management (click to expand)</strong></summary>
 
 To ensure reliability and avoid issues with external repositories going offline, this project uses a **fork-first** strategy:
 
@@ -154,7 +154,7 @@ To ensure reliability and avoid issues with external repositories going offline,
 </details>
 
 <details>
-<summary><strong>📊 Comparison: KDE vs GNOME for Unity</strong></summary>
+<summary><strong>➕ 📊 Comparison: KDE vs GNOME for Unity (click to expand)</strong></summary>
 
 | Feature | KDE | GNOME |
 |---------|-----|-------|
@@ -170,7 +170,7 @@ To ensure reliability and avoid issues with external repositories going offline,
 </details>
 
 <details>
-<summary><strong>🎯 Unity-like Features in Detail</strong></summary>
+<summary><strong>➕ 🎯 Unity-like Features in Detail (click to expand)</strong></summary>
 
 ### Native Global Menu
 - **Built-in KDE Feature**: No extensions needed
